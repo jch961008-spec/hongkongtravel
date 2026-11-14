@@ -1,0 +1,3400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>나만을 위한 홍콩 여행 올인원 가이드 & 플래너</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Pretendard alternative Noto Sans KR & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Leaflet.js CSS & JS for Interactive Hong Kong Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+            display: ['"Outfit"', '"Noto Sans KR"', 'sans-serif']
+          },
+          colors: {
+            hkRed: '#E11D48',
+            hkDark: '#0F172A',
+            hkJade: '#0D9488',
+            hkGold: '#F59E0B',
+            hkNeon: '#F43F5E'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Hong Kong Aesthetic Hero Gradient */
+    .hk-hero-bg {
+      background: radial-gradient(circle at 85% 20%, rgba(225, 29, 72, 0.32) 0%, transparent 45%),
+                  radial-gradient(circle at 15% 80%, rgba(13, 148, 136, 0.28) 0%, transparent 50%),
+                  linear-gradient(135deg, #090D16 0%, #1E1B4B 50%, #0F172A 100%);
+    }
+
+    /* Custom Marker Styles on Leaflet Map */
+    .custom-pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      border: 2.5px solid #ffffff;
+      transition: transform 0.2s ease;
+    }
+    .custom-pin:hover {
+      transform: scale(1.18);
+      z-index: 1000 !important;
+    }
+
+    /* Leaflet Popup Styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px !important;
+      padding: 4px !important;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2) !important;
+    }
+    .leaflet-popup-content {
+      margin: 10px 12px !important;
+      font-family: 'Noto Sans KR', sans-serif !important;
+    }
+
+    /* Page transition animation */
+    .page-section {
+      display: none;
+      animation: fadeIn 0.28s ease-out;
+    }
+    .page-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Print Media Query for Page 4 Final Travel Book */
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-section {
+        display: none !important;
+      }
+      #page-4 {
+        display: block !important;
+      }
+      .print-break-inside {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- ================================================================= -->
+  <!-- TOP STICKY HEADER & STEP NAVIGATION BAR                           -->
+  <!-- ================================================================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+        <!-- Brand Logo & Personal Title -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="switchPage(1)">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+              <i class="fa-solid fa-train-tram text-lg"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">HONG KONG CURATION</span>
+                <span id="header-traveler-badge" class="text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">VIP 1인 맞춤</span>
+                <span id="header-duration-badge" class="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">3박 4일</span>
+              </div>
+              <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                나만을 위한 홍콩 여행 가이드 & 플래너
+              </h1>
+            </div>
+          </div>
+
+          <!-- Mobile Basket Badge -->
+          <button onclick="switchPage(4)" class="md:hidden flex items-center gap-1.5 bg-slate-900 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow">
+            <i class="fa-solid fa-bookmark text-amber-400"></i>
+            <span>담은 장소</span>
+            <span id="mobile-selected-count" class="bg-rose-600 text-white px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+        </div>
+
+        <!-- 5-Step Split Page Navigation Tabs -->
+        <nav class="grid grid-cols-5 gap-1 sm:gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <button id="step-btn-1" onclick="switchPage(1)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all bg-rose-600 text-white shadow-sm">
+            <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0">1</span>
+            <span class="truncate">항공·교통비교</span>
+          </button>
+          <button id="step-btn-2" onclick="switchPage(2)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
+            <span class="truncate">맛집·핫플탐색</span>
+          </button>
+          <button id="step-btn-3" onclick="switchPage(3)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">3</span>
+            <span class="truncate">홍콩여행지도</span>
+          </button>
+          <button id="step-btn-4" onclick="switchPage(4)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">4</span>
+            <span class="truncate">일정계획서</span>
+            <span id="nav-selected-count" class="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-rose-100 text-rose-700">0</span>
+          </button>
+          <button id="step-btn-5" onclick="switchPage(5)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+            <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">5</span>
+            <span class="truncate">트래블북·체크</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- MAIN CONTENT CONTAINER (5 PAGES)                                  -->
+  <!-- ================================================================= -->
+  <main class="flex-grow">
+
+    <!-- =============================================================== -->
+    <!-- PAGE 1: 항공 비행시간·일정 계산기 & 공항/시내 교통수단 비교       -->
+    <!-- =============================================================== -->
+    <section id="page-1" class="page-section active">
+      <!-- Top Hero Banner -->
+      <div class="hk-hero-bg text-white py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-amber-300 mb-3">
+                <i class="fa-solid fa-plane-departure"></i>
+                <span>STEP 1 · 비행시간(시차 -1시간) · 스마트 일정 계산기 · 공항/시내 교통 비교</span>
+              </div>
+              <h2 class="text-2xl sm:text-4xl font-black tracking-tight">
+                홍콩 항공권 일정 계산기 & 최적 이동수단 설계
+              </h2>
+              <p class="mt-2 text-slate-300 text-sm sm:text-base max-w-2xl">
+                출국·귀국 날짜와 비행시간을 선택하면 <strong>전체 여행 일정과 첫날 시내 도착 시각, 마지막 날 공항 출발 시각</strong>을 자동 계산하고, 내 숙소와 인원수에 딱 맞는 교통수단을 추천합니다.
+              </p>
+            </div>
+
+            <!-- Traveler Basic Profile Quick Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/15 min-w-[300px]">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-300 mb-1">여행자 이름/별칭</label>
+                <input id="input-traveler-name" type="text" value="홍콩 러버" oninput="updateTripSettings()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-300 mb-1">여행 테마</label>
+                <select id="select-trip-vibe" onchange="updateTripSettings()" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-2 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-400">
+                  <option value="미식 & 인스타 핫플 정복">🥟 미식 & 핫플</option>
+                  <option value="야경 & 인생샷 감성 여행">🌃 야경 & 인생샷</option>
+                  <option value="디즈니랜드 & 랜드마크 올인">🎢 디즈니 & 랜드마크</option>
+                  <option value="여유로운 로컬 노포 & 카페 투어">☕ 로컬 노포 & 카페</option>
+                </select>
+              </div>
+              <div class="col-span-2 sm:col-span-1">
+                <label class="block text-[10px] font-bold text-slate-300 mb-1">환율 (1 HKD)</label>
+                <div class="flex items-center bg-slate-900/80 border border-slate-700 rounded-xl px-2.5 py-1.5">
+                  <input id="input-exchange-rate" type="number" value="180" oninput="updateTripSettings()" class="w-full bg-transparent text-xs font-bold text-amber-400 focus:outline-none" />
+                  <span class="text-[10px] text-slate-400 font-semibold ml-1">원</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+        <!-- ============================================================= -->
+        <!-- SECTION A: 출도착 일시 & 비행시간 반영 스마트 일정 계산기       -->
+        <!-- ============================================================= -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 sm:p-7">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+            <div>
+              <span class="text-xs font-extrabold text-rose-600 uppercase tracking-wider">SMART SCHEDULE CALCULATOR</span>
+              <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2 mt-0.5">
+                <i class="fa-solid fa-calendar-check text-rose-600"></i>
+                <span>출도착 일시 · 비행시간 반영 일정 계산기</span>
+              </h3>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold bg-indigo-50 text-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-200">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>한국 ↔ 홍콩 시차: <strong>-1시간</strong> (한국이 1시간 빠름)</span>
+            </div>
+          </div>
+
+          <!-- Date & Flight Time Inputs -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+              <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛫 한국 출발일 (출국)</label>
+              <input id="calc-start-date" type="date" value="2025-05-01" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
+              <p class="text-[11px] text-slate-500 mt-1.5">인천/김해 등 출발 날짜 선택</p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+              <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛫 가는 편 비행 시간대 (ICN → HKG)</label>
+              <select id="calc-outbound-preset" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500">
+                <option value="09:00|11:55|3시간 55분" selected>오전 출발 (09:00 출발 → 11:55 도착)</option>
+                <option value="07:30|10:15|3시간 45분">이른 아침 (07:30 출발 → 10:15 도착)</option>
+                <option value="13:30|16:25|3시간 55분">오후 출발 (13:30 출발 → 16:25 도착)</option>
+                <option value="19:45|22:40|3시간 55분">저녁 퇴근박 (19:45 출발 → 22:40 도착)</option>
+                <option value="22:20|01:15|3시간 55분">심야 출발 (22:20 출발 → 01:15+1 도착)</option>
+              </select>
+              <p class="text-[11px] text-teal-700 font-semibold mt-1.5">비행 약 3시간 50분~4시간 소요</p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+              <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛬 홍콩 출발일 (귀국)</label>
+              <input id="calc-end-date" type="date" value="2025-05-04" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
+              <p class="text-[11px] text-slate-500 mt-1.5">홍콩국제공항 출발 날짜 선택</p>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+              <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛬 오는 편 비행 시간대 (HKG → ICN)</label>
+              <select id="calc-inbound-preset" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500">
+                <option value="17:50|22:25|3시간 35분" selected>저녁 출발 (17:50 출발 → 22:25 도착)</option>
+                <option value="13:05|17:40|3시간 35분">낮 출발 (13:05 출발 → 17:40 도착)</option>
+                <option value="15:30|20:05|3시간 35분">오후 출발 (15:30 출발 → 20:05 도착)</option>
+                <option value="00:55|05:25|3시간 30분">밤/심야 기내박 (00:55 출발 → 05:25 도착)</option>
+              </select>
+              <p class="text-[11px] text-teal-700 font-semibold mt-1.5">편서풍 영향으로 귀국편은 약 3시간 35분 소요</p>
+            </div>
+          </div>
+
+          <!-- Visual Flight & Duration Calculation Result Cards -->
+          <div class="mt-5 grid grid-cols-1 md:grid-cols-4 gap-3.5">
+            <!-- Card 1: Total Nights & Days -->
+            <div class="bg-gradient-to-br from-rose-600 to-rose-700 text-white rounded-2xl p-4 shadow-sm">
+              <div class="text-xs font-bold text-rose-200">일정 계산 결과</div>
+              <div id="calc-result-duration" class="text-2xl sm:text-3xl font-black mt-1">3박 4일</div>
+              <div id="calc-result-duration-sub" class="text-xs text-rose-100 mt-1">일정표 Day 1 ~ Day 4 자동 생성됨</div>
+            </div>
+
+            <!-- Card 2: Day 1 City Arrival Estimate -->
+            <div class="bg-slate-900 text-white rounded-2xl p-4">
+              <div class="text-xs font-bold text-amber-300"><i class="fa-solid fa-hotel mr-1"></i>첫날 시내(숙소) 도착 예상</div>
+              <div id="calc-result-day1-city" class="text-xl sm:text-2xl font-black text-white mt-1">13:30경</div>
+              <div id="calc-result-day1-desc" class="text-[11px] text-slate-300 mt-1">입국심사 50분 + 공항 이동시간 반영</div>
+            </div>
+
+            <!-- Card 3: Final Day Airport Departure Estimate -->
+            <div class="bg-slate-900 text-white rounded-2xl p-4">
+              <div class="text-xs font-bold text-teal-300"><i class="fa-solid fa-plane-up mr-1"></i>마지막 날 공항 출발 권장</div>
+              <div id="calc-result-lastday-leave" class="text-xl sm:text-2xl font-black text-white mt-1">14:10경</div>
+              <div id="calc-result-lastday-desc" class="text-[11px] text-slate-300 mt-1">출발 3시간 전 공항 도착 기준</div>
+            </div>
+
+            <!-- Card 4: Net Sightseeing Hours -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <div class="text-xs font-extrabold text-amber-900"><i class="fa-solid fa-hourglass-half mr-1"></i>실제 현지 알짜 관광시간</div>
+              <div id="calc-result-net-hours" class="text-xl sm:text-2xl font-black text-rose-600 mt-1">약 41시간</div>
+              <div id="calc-result-net-tip" class="text-[11px] text-slate-600 mt-1">취침 제외 순수 여행 가용 시간</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECTION B: 공항 ↔ 시내 교통수단 추천 & 비교 시뮬레이터         -->
+        <!-- ============================================================= -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 sm:p-7">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+            <div>
+              <span class="text-xs font-extrabold text-teal-600 uppercase tracking-wider">AIRPORT TO CITY SIMULATOR</span>
+              <h3 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2 mt-0.5">
+                <i class="fa-solid fa-train-subway text-teal-600"></i>
+                <span>홍콩국제공항 ↔ 시내 이동수단 맞춤 추천 & 3대 수단 비교</span>
+              </h3>
+            </div>
+            <span class="text-xs text-slate-500">숙소 위치와 인원수를 바꾸면 1순위 추천과 총비용이 실시간 계산됩니다.</span>
+          </div>
+
+          <!-- Interactive Simulator Controls -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">🏨 내 숙소 위치 권역</label>
+              <select id="sim-hotel-area" onchange="renderAirportTransportComparison()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="침사추이/구룡" selected>침사추이 · 조던 · 서구룡</option>
+                <option value="센트럴/소호">센트럴 · 소호 · 셩완</option>
+                <option value="몽콕/야우마테이">몽콕 · 야우마테이 · 프린스에드워드</option>
+                <option value="코즈웨이베이/동부">완차이 · 코즈웨이베이 · 노스포인트</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">👥 동행 인원수</label>
+              <select id="sim-pax" onchange="renderAirportTransportComparison()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="1" selected>1명 (나 혼자 여행)</option>
+                <option value="2">2명 (커플·친구 2인)</option>
+                <option value="3">3명 (3인 가족/친구)</option>
+                <option value="4">4명 (4인 그룹·택시 가성비)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">🧳 대형 캐리어 개수</label>
+              <select id="sim-luggage" onchange="renderAirportTransportComparison()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="0">기내용 배낭/보스턴백만 (0개)</option>
+                <option value="1" selected>캐리어 1개</option>
+                <option value="2">캐리어 2개</option>
+                <option value="3">캐리어 3개 이상</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">⚡ 나의 이동 우선순위</label>
+              <select id="sim-priority" onchange="renderAirportTransportComparison()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900">
+                <option value="balanced" selected>⚡ 속도 + 환승 편의성 균형</option>
+                <option value="speed">🚀 무조건 가장 빠른 도착 (얼리체크인)</option>
+                <option value="budget">💰 극강의 가성비 & 환승 없이 한 번에</option>
+                <option value="comfort">🚕 호텔 문 앞까지 편안하게 (체력 세이브)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- AI Best Recommendation Banner -->
+          <div id="airport-best-banner" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 sm:p-5 mb-5 shadow-sm">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- 3-Column Comparison Cards (AEL vs Bus vs Taxi) -->
+          <div id="airport-comparison-cards" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SECTION C: 홍콩 시내 핵심 이동수단 5종 비교 & 구간별 소요시간 조회 -->
+        <!-- ============================================================= -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left 7 Cols: 5 Local Transport Modes Comparison Table -->
+          <div class="lg:col-span-7 bg-white rounded-3xl shadow-sm border border-slate-200 p-5 sm:p-6">
+            <span class="text-xs font-extrabold text-rose-600 uppercase tracking-wider">HONG KONG CITY TRANSIT GUIDE</span>
+            <h3 class="text-lg font-black text-slate-900 flex items-center gap-2 mt-0.5 mb-4">
+              <i class="fa-solid fa-ferry text-rose-600"></i>
+              <span>홍콩 시내 5대 이동수단 완벽 비교 & 탑승 꿀팁</span>
+            </h3>
+
+            <div class="space-y-3">
+              <!-- 1. MTR -->
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black shrink-0 mt-0.5">
+                  <i class="fa-solid fa-train-subway"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex flex-wrap items-center justify-between gap-1">
+                    <span class="font-black text-sm text-slate-900">1. MTR 지하철 (가장 빠르고 정확함)</span>
+                    <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg">1회 HK$ 5 ~ 15 (약 900~2,700원)</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    침사추이↔센트럴(하버 해저터널 통과) 단 <strong>7분</strong>! 배차간격 2~3분. 옥토퍼스 카드 및 비자/마스터 트래블 카드 컨택리스 개찰구 터치 완벽 지원. <strong class="text-rose-600">(주의: 객차 내 물 포함 취식 시 벌금 HK$ 2,000)</strong>
+                  </p>
+                </div>
+              </div>
+
+              <!-- 2. Star Ferry -->
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black shrink-0 mt-0.5">
+                  <i class="fa-solid fa-ferry"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex flex-wrap items-center justify-between gap-1">
+                    <span class="font-black text-sm text-slate-900">2. 스타페리 (침사추이 ↔ 센트럴/완차이)</span>
+                    <span class="text-xs font-extrabold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg">편도 HK$ 5.0 ~ 6.5 (약 1,000원)</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    소요시간 <strong>약 8~10분</strong>. 지하철보다 저렴하면서 빅토리아 하버 파노라마 뷰를 감상할 수 있는 최고의 가성비 크루즈! 무조건 <strong>2층(Upper Deck)</strong> 통로로 탑승하세요.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 3. Ding Ding Tram -->
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 mt-0.5">
+                  <i class="fa-solid fa-train-tram"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex flex-wrap items-center justify-between gap-1">
+                    <span class="font-black text-sm text-slate-900">3. 홍콩섬 2층 트램 '딩딩이' (케네디타운~코즈웨이~익청빌딩)</span>
+                    <span class="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg">전 구간 단일 HK$ 3.3 (약 600원)</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    홍콩섬 북부를 동서로 달리는 120년 역사의 명물. <strong>뒷문으로 먼저 탑승</strong>해 2층 맨 앞자리에 앉고, 내릴 때 <strong>앞문에서 옥토퍼스/현금/컨택리스 결제</strong>합니다.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 4. Peak Tram -->
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black shrink-0 mt-0.5">
+                  <i class="fa-solid fa-mountain-sun"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex flex-wrap items-center justify-between gap-1">
+                    <span class="font-black text-sm text-slate-900">4. 6세대 피크트램 vs 15번 2층 버스 (빅토리아 피크행)</span>
+                    <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg">트램 왕복+전망대 HK$ 148 / 15번 버스 HK$ 12.1</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    피크트램은 급경사를 <strong>8분</strong> 만에 오르며, 대기 줄이 너무 길 땐 센트럴 선착장/익스체인지 스퀘어에서 <strong>15번 2층 버스(약 35분)</strong>로 대체하면 절경을 보며 저렴하게 올라갑니다.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 5. Mid-Levels Escalator & Taxi -->
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black shrink-0 mt-0.5">
+                  <i class="fa-solid fa-elevator"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex flex-wrap items-center justify-between gap-1">
+                    <span class="font-black text-sm text-slate-900">5. 미드레벨 에스컬레이터 & 시내 택시/Uber</span>
+                    <span class="text-xs font-extrabold text-purple-800 bg-purple-50 px-2 py-0.5 rounded-lg">에스컬레이터 무료 / 택시 기본료 HK$ 29</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1">
+                    미드레벨 에스컬레이터는 <strong>10:00까지 하행, 10:30~24:00 상행 운행</strong>! 올라갈 때 타고 내려올 때 소호 골목을 걸으세요. 중간에 옥토퍼스 리더기에 태그하면 당일 MTR HK$ 2 할인!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right 5 Cols: Point-to-Point Route Calculator + Total Transport Budget -->
+          <div class="lg:col-span-5 flex flex-col justify-between gap-5">
+            <!-- Point-to-Point Route Finder -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 sm:p-6">
+              <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">POINT-TO-POINT ROUTE CHECKER</span>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mt-0.5 mb-3">
+                <i class="fa-solid fa-route text-indigo-600"></i>
+                <span>주요 구간별 추천 이동수단 & 소요시간 조회</span>
+              </h3>
+
+              <div class="grid grid-cols-2 gap-2.5 mb-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-500 mb-1">출발지 선택</label>
+                  <select id="p2p-from" onchange="updateP2PRoute()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+                    <option value="침사추이" selected>침사추이 (구룡)</option>
+                    <option value="센트럴/소호">센트럴·소호 (홍콩섬)</option>
+                    <option value="몽콕/조던">몽콕·조던</option>
+                    <option value="완차이/코즈웨이">완차이·코즈웨이베이</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-500 mb-1">도착지 선택</label>
+                  <select id="p2p-to" onchange="updateP2PRoute()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+                    <option value="센트럴/소호" selected>센트럴·소호 (홍콩섬)</option>
+                    <option value="침사추이">침사추이 (구룡)</option>
+                    <option value="빅토리아피크">빅토리아 피크 (산정)</option>
+                    <option value="익청빌딩">익청빌딩 (쿼리베이)</option>
+                    <option value="초이홍아파트">초이홍 아파트</option>
+                    <option value="디즈니랜드">홍콩 디즈니랜드</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="p2p-result-box" class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-3.5 space-y-2 text-xs">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Total Estimated Transport Budget Card -->
+            <div class="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-md">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-extrabold text-amber-400 uppercase tracking-wider">OCTOPUS & TRANSPORT BUDGET</span>
+                <span class="text-[11px] bg-white/10 px-2 py-0.5 rounded-full text-teal-300 font-bold">1인 기준 자동 합산</span>
+              </div>
+              <h4 class="text-base font-black">전체 여정 예상 교통비 총합 (공항 왕복 + 시내)</h4>
+              <p id="transport-budget-breakdown" class="text-xs text-slate-300 mt-1">
+                선택된 공항 왕복 수단 + 4일간 시내 MTR·페리·트램 평균 이용료 합산
+              </p>
+
+              <div class="mt-4 pt-3 border-t border-white/10 flex items-end justify-between">
+                <div>
+                  <div class="text-[11px] text-slate-400">1인 예상 총 교통비 (옥토퍼스 권장 충전액)</div>
+                  <div class="text-2xl font-black text-amber-400">
+                    HK$ <span id="total-transport-hkd">190</span>
+                    <span class="text-sm font-bold text-teal-300 ml-1">(약 <span id="total-transport-krw">34,200</span>원)</span>
+                  </div>
+                </div>
+                <button onclick="switchPage(2)" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold transition shadow">
+                  맛집·명소 담으러 가기 <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- PAGE 2: 홍콩 핫플/맛집 탐색 & 담기 (EXPLORER)                     -->
+    <!-- =============================================================== -->
+    <section id="page-2" class="page-section">
+      <!-- Hero Banner & Preset Quick Course Buttons -->
+      <div class="hk-hero-bg text-white py-7 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto relative z-10">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-amber-300 mb-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>STEP 2 · 구글 지도 평점 · 인스타그램 바이럴 · 미슐랭 · 네이버 블로그 빅데이터 엄선</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+                오직 <span id="hero-traveler-name" class="text-amber-400 underline decoration-rose-500 decoration-wavy underline-offset-4">나</span>만을 위한 홍콩 맛집·명소 24선
+              </h2>
+              <p class="mt-1.5 text-slate-300 text-xs sm:text-sm max-w-2xl">
+                1단계에서 설정한 <strong id="explorer-duration-label" class="text-amber-300">3박 4일</strong> 일정에 맞춰 가고 싶은 곳을 골라 담으세요.
+              </p>
+            </div>
+
+            <!-- Preset Quick Course Buttons -->
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 sm:p-4 flex flex-col gap-2 min-w-[280px]">
+              <div class="text-xs font-bold text-amber-300 flex items-center justify-between">
+                <span><i class="fa-solid fa-bolt mr-1"></i>원클릭 추천 패키지 담기</span>
+                <span class="text-[11px] text-slate-300 font-normal">초보자 추천!</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="applyPresetCourse('classic')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
+                  🔥 첫 홍콩 핵심 12선
+                </button>
+                <button onclick="applyPresetCourse('foodie')" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
+                  🥟 미슐랭·바이럴 미식 10선
+                </button>
+                <button onclick="applyPresetCourse('disney')" class="text-xs bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
+                  🏰 디즈니+인생샷 11선
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & Search Controls -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+          <!-- Top Row: Search Bar + Action Toggles -->
+          <div class="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+            <div class="relative flex-grow">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input
+                id="search-input"
+                type="text"
+                oninput="renderPlaceCards()"
+                placeholder="장소명, 메뉴(에그타르트, 완탕면, 구스, 야경), 지역 검색..."
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
+              />
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                id="btn-filter-selected"
+                onclick="toggleSelectedOnlyFilter()"
+                class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
+              >
+                <i class="fa-solid fa-check-double text-rose-600"></i>
+                <span>내가 담은 곳만 보기</span>
+                <span id="filter-selected-badge" class="px-1.5 py-0.5 text-xs rounded-full bg-rose-100 text-rose-700 font-extrabold">0</span>
+              </button>
+
+              <button
+                onclick="openCustomSpotModal()"
+                class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-sm"
+              >
+                <i class="fa-solid fa-plus text-amber-400"></i>
+                <span>나만의 장소 추가</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- District Filter Pills -->
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-location-dot text-rose-500"></i>
+              <span>홍콩 지역별 필터 (District)</span>
+            </div>
+            <div id="district-filter-bar" class="flex flex-wrap gap-1.5">
+              <button onclick="setFilter('district', 'ALL')" data-val="ALL" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">전체 지역</button>
+              <button onclick="setFilter('district', '센트럴/소호')" data-val="센트럴/소호" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">센트럴·소호·셩완</button>
+              <button onclick="setFilter('district', '침사추이/구룡')" data-val="침사추이/구룡" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">침사추이·서구룡</button>
+              <button onclick="setFilter('district', '몽콕/야우마테이')" data-val="몽콕/야우마테이" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">몽콕·조던·초이홍</button>
+              <button onclick="setFilter('district', '코즈웨이베이/동부')" data-val="코즈웨이베이/동부" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">완차이·코즈웨이·익청빌딩</button>
+              <button onclick="setFilter('district', '란타우/디즈니')" data-val="란타우/디즈니" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">란타우·디즈니·옹핑</button>
+            </div>
+          </div>
+
+          <!-- Category & Viral Source Filter Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+            <!-- Category Filter -->
+            <div>
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-utensils text-amber-500"></i>
+                <span>카테고리별 (Category)</span>
+              </div>
+              <div id="category-filter-bar" class="flex flex-wrap gap-1.5">
+                <button onclick="setFilter('category', 'ALL')" data-val="ALL" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-sm transition">전체</button>
+                <button onclick="setFilter('category', '미슐랭 & 노포 맛집')" data-val="미슐랭 & 노포 맛집" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🍜 미슐랭 & 노포 맛집</button>
+                <button onclick="setFilter('category', '인스타 바이럴 디저트/카페')" data-val="인스타 바이럴 디저트/카페" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🥧 바이럴 디저트·카페</button>
+                <button onclick="setFilter('category', '필수 랜드마크/야경')" data-val="필수 랜드마크/야경" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌃 필수 랜드마크·야경</button>
+                <button onclick="setFilter('category', '포토스팟 & 쇼핑')" data-val="포토스팟 & 쇼핑" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">📸 포토스팟·쇼핑</button>
+              </div>
+            </div>
+
+            <!-- Viral / Reputation Source Filter -->
+            <div>
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-fire text-rose-500"></i>
+                <span>평판·바이럴 출처 필터 (Curation Source)</span>
+              </div>
+              <div id="viral-filter-bar" class="flex flex-wrap gap-1.5">
+                <button onclick="setFilter('viral', 'ALL')" data-val="ALL" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition">전체 출처</button>
+                <button onclick="setFilter('viral', '구글평점TOP')" data-val="구글평점TOP" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌟 구글 평점 4.4+</button>
+                <button onclick="setFilter('viral', '인스타바이럴')" data-val="인스타바이럴" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">📸 인스타·블로그 떡상</button>
+                <button onclick="setFilter('viral', '미슐랭노포')" data-val="미슐랭노포" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🏅 미슐랭·백종원·현지인 노포</button>
+                <button onclick="setFilter('viral', '여행사필수')" data-val="여행사필수" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🎫 여행사 필수 코스</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar above Cards -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 my-4 px-1">
+          <div class="text-sm font-bold text-slate-700">
+            검색된 홍콩 스팟 <span id="spot-result-count" class="text-rose-600 font-extrabold">24</span>곳
+            <span class="text-xs font-normal text-slate-500 ml-2">원하는 장소를 담고 다음 단계(지도/일정표)로 이동하세요.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="selectAllFiltered()" class="text-xs font-bold text-teal-700 hover:underline px-2 py-1">현재 목록 전체 담기</button>
+            <span class="text-slate-300">|</span>
+            <button onclick="clearAllSelected()" class="text-xs font-bold text-slate-500 hover:text-rose-600 px-2 py-1">선택 초기화</button>
+          </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- PAGE 3: 홍콩 인터랙티브 여행 지도 & 동선 시각화 (MAP VIEW)       -->
+    <!-- =============================================================== -->
+    <section id="page-3" class="page-section">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Map Top Control Bar -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-700">STEP 3</span>
+              <h2 class="text-lg sm:text-xl font-black text-slate-900">홍콩 인터랙티브 동선 지도 & 구간별 이동수단 추천</h2>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+              일자별 동선(Day 1 ~ Day N)을 선택하면 장소 간 거리와 최적 이동수단(스타페리, MTR, 딩딩이 트램, 도보)을 자동으로 안내합니다.
+            </p>
+          </div>
+
+          <!-- Dynamic Map Mode Filter Buttons -->
+          <div id="map-mode-buttons-bar" class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            <!-- Populated dynamically based on tripDays -->
+          </div>
+        </div>
+
+        <!-- Map + Sidebar Split Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Left Sidebar: Spot List & Distance/Transit Summary -->
+          <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[540px] lg:h-[640px] overflow-hidden">
+            <div class="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div>
+                <h3 id="map-sidebar-title" class="text-sm font-extrabold text-slate-800">지도에 표시된 장소</h3>
+                <p id="map-route-summary" class="text-xs text-slate-500 mt-0.5">마커를 클릭하면 상세 정보와 구글 지도 길찾기가 열립니다.</p>
+              </div>
+              <button onclick="autoAssignSmartRoute(); setMapMode('DAY1');" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-2.5 py-1.5 rounded-lg shadow-sm transition shrink-0">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>자동 동선 묶기
+              </button>
+            </div>
+
+            <!-- Legend -->
+            <div class="px-4 py-2 bg-white border-b border-slate-100 flex flex-wrap gap-3 text-[11px] font-bold text-slate-600">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>맛집/노포</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>디저트/카페</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>랜드마크/야경</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block"></span>포토/쇼핑</span>
+            </div>
+
+            <!-- Scrollable List of Spots on Map -->
+            <div id="map-sidebar-list" class="flex-grow overflow-y-auto p-3 space-y-2.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Right Area: Leaflet Interactive Map Container -->
+          <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[540px] lg:h-[640px] relative">
+            <div id="hk-leaflet-map" class="w-full h-full z-10"></div>
+
+            <!-- Floating Quick Region Jump Buttons -->
+            <div class="absolute bottom-4 left-4 right-4 z-20 flex flex-wrap gap-1.5 pointer-events-none">
+              <div class="bg-slate-900/90 backdrop-blur-md text-white p-2 rounded-xl shadow-lg flex flex-wrap items-center gap-1.5 pointer-events-auto border border-white/15">
+                <span class="text-[11px] font-bold text-amber-300 px-1.5"><i class="fa-solid fa-compass mr-1"></i>빠른 지역 이동:</span>
+                <button onclick="flyToRegion(22.2819, 114.1556, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">센트럴·소호</button>
+                <button onclick="flyToRegion(22.2950, 114.1722, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">침사추이·하버</button>
+                <button onclick="flyToRegion(22.3160, 114.1700, 14)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">몽콕·조던</button>
+                <button onclick="flyToRegion(22.2839, 114.2122, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">익청빌딩</button>
+                <button onclick="flyToRegion(22.3010, 113.9800, 12)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">디즈니·옹핑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- PAGE 4: 맞춤형 일정 계획서 편집기 (SMART ITINERARY BUILDER)       -->
+    <!-- =============================================================== -->
+    <section id="page-4" class="page-section">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Builder Header & AI Smart Grouping Actions -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md mb-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-400 text-slate-950">STEP 4</span>
+                <span id="builder-flight-summary-badge" class="text-xs font-bold text-amber-300">비행 스케줄 & 지역별 클러스터링 반영</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black">나만의 홍콩 일자별 맞춤 계획서 편집</h2>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                1단계에서 계산된 <strong>첫날 시내 도착 시각</strong>과 <strong>마지막 날 공항 출발 시각</strong>이 각 일자 상단에 표시됩니다.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button
+                onclick="autoAssignSmartRoute()"
+                class="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-rose-600/30 transition"
+              >
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>AI 지역별 최적 동선 자동 배정</span>
+              </button>
+              <button
+                onclick="switchPage(2)"
+                class="flex items-center gap-1.5 px-3.5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/15 transition"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>장소 더 담기</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Budget & Count Summary Bar -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-white/10">
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="text-[11px] text-slate-400 font-semibold">선택한 총 스팟 / 기간</div>
+              <div class="text-lg sm:text-xl font-black text-white mt-0.5"><span id="builder-total-spots">0</span>곳 <span id="builder-days-tag" class="text-xs text-amber-300 font-bold ml-1">(3박 4일)</span></div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="text-[11px] text-slate-400 font-semibold">식비·입장료 예산 합계</div>
+              <div class="text-lg sm:text-xl font-black text-amber-400 mt-0.5">HK$ <span id="builder-total-hkd">0</span></div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="text-[11px] text-slate-400 font-semibold">1인 예상 교통비 (공항+시내)</div>
+              <div class="text-lg sm:text-xl font-black text-rose-300 mt-0.5">HK$ <span id="builder-transport-hkd">190</span></div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="text-[11px] text-slate-400 font-semibold">총 합산 경비 (원화 환산)</div>
+              <div class="text-lg sm:text-xl font-black text-teal-300 mt-0.5">약 <span id="builder-total-krw">0</span>원</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day Tabs Selector -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div class="flex flex-wrap gap-2" id="day-filter-tabs">
+            <!-- Populated dynamically by JS according to tripDays -->
+          </div>
+
+          <div class="text-xs text-slate-500 font-medium">
+            <i class="fa-solid fa-circle-info text-teal-600 mr-1"></i>각 일정의 시간, 예상 비용(HK$), 나만의 메모를 직접 수정할 수 있습니다.
+          </div>
+        </div>
+
+        <!-- Day-by-Day Itinerary Columns Container -->
+        <div id="itinerary-days-container" class="space-y-6">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- PAGE 5: 한 사람만을 위한 최종 트래블 북 & 실전 체크리스트          -->
+    <!-- =============================================================== -->
+    <section id="page-5" class="page-section">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Export & Share Action Bar (Hidden when printing) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-black">
+              <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-900">나만의 홍콩 트래블 북 완성!</h3>
+              <p class="text-xs text-slate-500">PDF/인쇄용으로 저장하거나 카카오톡 공유용 텍스트로 한 번에 복사하세요.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="copyItineraryText()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-sm">
+              <i class="fa-solid fa-copy"></i>
+              <span>카카오톡/메모장 텍스트 복사</span>
+            </button>
+            <button onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm transition shadow-sm">
+              <i class="fa-solid fa-print"></i>
+              <span>인쇄 / PDF 저장</span>
+            </button>
+            <button onclick="saveToLocalStorage(true)" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
+              <i class="fa-solid fa-floppy-disk text-teal-300"></i>
+              <span>브라우저 저장</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PRINTABLE PERSONAL TRAVEL BOOK CARD -->
+        <div class="bg-white rounded-3xl shadow-md border border-slate-200 overflow-hidden">
+          <!-- Travel Book Cover Banner -->
+          <div class="hk-hero-bg text-white p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <div class="inline-block px-3 py-1 rounded-full bg-rose-600 text-white text-xs font-extrabold tracking-wider uppercase mb-2">
+                  BESPOKE HONG KONG TRAVEL BOOK
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight">
+                  <span id="book-traveler-name" class="text-amber-400">홍콩 러버</span>님을 위한 홍콩 여행 계획서
+                </h2>
+                <p id="book-trip-subtitle" class="text-slate-300 text-sm mt-1">
+                  3박 4일 · 미식 & 인스타 핫플 정복 코스
+                </p>
+                <div id="book-flight-transport-summary" class="mt-3 inline-flex flex-wrap items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl text-xs text-amber-200 border border-white/10">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/15 text-right shrink-0">
+                <div class="text-[11px] text-slate-300">1인 총 예상 경비 (식비+입장료+교통비 합산 / 1 HKD=<span id="book-rate-label">180</span>원)</div>
+                <div class="text-xl font-black text-amber-400">HK$ <span id="book-total-hkd">0</span></div>
+                <div class="text-xs font-bold text-teal-300">약 <span id="book-total-krw">0</span>원</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final Timeline Section -->
+          <div class="p-6 sm:p-8 space-y-8">
+            <div>
+              <h3 class="text-lg font-black text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-200">
+                <i class="fa-solid fa-route text-rose-600"></i>
+                <span>일자별 상세 스케줄 & 핵심 주문 꿀팁</span>
+              </h3>
+              <div id="book-timeline-content" class="mt-5 space-y-6">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- Hong Kong Cantonese Restaurant Cheat Sheet (Click to Enlarge/Copy) -->
+            <div class="print-break-inside pt-4 border-t border-slate-200">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <i class="fa-solid fa-language text-amber-500"></i>
+                  <span>홍콩 로컬 식당 실전 주문 & 광둥어 치트시트</span>
+                </h3>
+                <span class="text-xs text-slate-500 no-print">카드를 클릭하면 직원에게 보여줄 수 있게 크게 확대됩니다!</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div onclick="showPhraseModal('唔該, 走芫茜', '음고이, 짜우 임사이', '고수는 빼주세요! (완탕면·국수 주문 시 필수)')" class="cursor-pointer bg-rose-50/70 hover:bg-rose-100/80 border border-rose-200 rounded-2xl p-3.5 transition">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">필수 생존어 1위</span>
+                    <i class="fa-solid fa-expand text-rose-400 text-xs no-print"></i>
+                  </div>
+                  <div class="text-lg font-black text-slate-900 mt-1.5">唔該, 走芫茜</div>
+                  <div class="text-xs font-bold text-rose-700">발음: 음고이, 짜우 임사이</div>
+                  <div class="text-xs text-slate-600 mt-1">뜻: 고수는 빼주세요!</div>
+                </div>
+
+                <div onclick="showPhraseModal('唔該, 凍鴛鴦 少甜', '음고이, 동윤영 씨우팀', '아이스 밀크티+커피(동윤영) 덜 달게 주세요')" class="cursor-pointer bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200 rounded-2xl p-3.5 transition">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">차찬탱 음료 주문</span>
+                    <i class="fa-solid fa-expand text-amber-500 text-xs no-print"></i>
+                  </div>
+                  <div class="text-lg font-black text-slate-900 mt-1.5">凍鴛鴦 少甜</div>
+                  <div class="text-xs font-bold text-amber-800">발음: 동윤영 씨우팀</div>
+                  <div class="text-xs text-slate-600 mt-1">뜻: 아이스 동윤영(밀크티+커피) 덜 달게</div>
+                </div>
+
+                <div onclick="showPhraseModal('唔該, 埋單', '음고이, 마이단', '계산해 주세요! (영수증 확인 후 카운터 계산)')" class="cursor-pointer bg-teal-50/70 hover:bg-teal-100/80 border border-teal-200 rounded-2xl p-3.5 transition">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-teal-800 bg-teal-100 px-2 py-0.5 rounded-md">식사 후 계산</span>
+                    <i class="fa-solid fa-expand text-teal-500 text-xs no-print"></i>
+                  </div>
+                  <div class="text-lg font-black text-slate-900 mt-1.5">唔該, 埋單</div>
+                  <div class="text-xs font-bold text-teal-800">발음: 음고이, 마이단</div>
+                  <div class="text-xs text-slate-600 mt-1">뜻: 여기 계산서 주세요!</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Hong Kong Pre-Trip Checklist -->
+            <div class="print-break-inside pt-4 border-t border-slate-200">
+              <h3 class="text-lg font-black text-slate-900 flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-clipboard-check text-teal-600"></i>
+                <span>홍콩 출발 전 필수 준비물 & 꿀팁 체크리스트</span>
+              </h3>
+              <div id="checklist-container" class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- STICKY BOTTOM PAGE SPLIT CONTROLLER (PREV / NEXT STEP)            -->
+  <!-- ================================================================= -->
+  <footer class="sticky bottom-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3 px-4 sm:px-6 no-print shadow-lg">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <button
+        id="btn-prev-page"
+        onclick="navigateStep(-1)"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition disabled:opacity-40 disabled:pointer-events-none"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="prev-page-label">이전 단계</span>
+      </button>
+
+      <!-- Center Floating Status Summary -->
+      <div class="hidden sm:flex items-center gap-4 bg-slate-900 text-white px-4 py-2 rounded-2xl text-xs font-bold">
+        <div class="flex items-center gap-1.5">
+          <i class="fa-solid fa-heart text-rose-500"></i>
+          <span>선택한 장소:</span>
+          <span id="footer-selected-count" class="text-amber-400 font-extrabold">0곳</span>
+        </div>
+        <span class="text-slate-600">|</span>
+        <div class="flex items-center gap-1.5">
+          <i class="fa-solid fa-coins text-amber-400"></i>
+          <span>예상 경비:</span>
+          <span id="footer-budget-summary" class="text-teal-300 font-extrabold">HK$ 0</span>
+        </div>
+      </div>
+
+      <button
+        id="btn-next-page"
+        onclick="navigateStep(1)"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/25 transition"
+      >
+        <span id="next-page-label">다음: 홍콩 지도 & 동선 보기</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 1: ADD CUSTOM PLACE MODAL                                   -->
+  <!-- ================================================================= -->
+  <div id="custom-spot-modal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-map-pin text-rose-600"></i>
+          <span>나만의 홍콩 장소 직접 추가</span>
+        </h3>
+        <button onclick="closeCustomSpotModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleAddCustomSpot(event)" class="space-y-3.5 mt-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">장소 이름 (숙소, 식당, 쇼핑몰 등) *</label>
+          <input id="custom-name" type="text" required placeholder="예: 포시즌스 호텔 홍콩 / 제니베이커리 침사추이" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">지역 선택</label>
+            <select id="custom-district" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500">
+              <option value="센트럴/소호">센트럴/소호</option>
+              <option value="침사추이/구룡">침사추이/구룡</option>
+              <option value="몽콕/야우마테이">몽콕/야우마테이</option>
+              <option value="코즈웨이베이/동부">코즈웨이베이/동부</option>
+              <option value="란타우/디즈니">란타우/디즈니</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">카테고리</label>
+            <select id="custom-category" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500">
+              <option value="미슐랭 & 노포 맛집">🍜 미슐랭 & 노포 맛집</option>
+              <option value="인스타 바이럴 디저트/카페">🥧 인스타 바이럴 디저트/카페</option>
+              <option value="필수 랜드마크/야경">🌃 필수 랜드마크/야경</option>
+              <option value="포토스팟 & 쇼핑">📸 포토스팟 & 쇼핑</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">예상 경비 (HK$)</label>
+            <input id="custom-price" type="number" value="100" min="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">배정할 일자 (Day)</label>
+            <select id="custom-day" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500">
+              <option value="1">Day 1</option>
+              <option value="2">Day 2</option>
+              <option value="3">Day 3</option>
+              <option value="4">Day 4</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">핵심 메뉴 / 메모 / 꿀팁</label>
+          <input id="custom-tip" type="text" placeholder="예: 마카다미아 쿠키 오픈런, 현금 준비 필수" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeCustomSpotModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">취소</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold shadow-sm">장소 추가 및 일정에 담기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL 2: CANTONESE PHRASE LARGE DISPLAY MODAL                     -->
+  <!-- ================================================================= -->
+  <div id="phrase-modal" onclick="closePhraseModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div onclick="event.stopPropagation()" class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border-4 border-amber-400">
+      <div class="text-xs font-extrabold uppercase tracking-wider text-rose-600 bg-rose-50 inline-block px-3 py-1 rounded-full">
+        직원에게 이 화면을 보여주세요
+      </div>
+      <div id="modal-phrase-hanzi" class="text-4xl sm:text-5xl font-black text-slate-900 my-6 leading-tight">
+        唔該, 走芫茜
+      </div>
+      <div id="modal-phrase-pron" class="text-base font-extrabold text-rose-600 mb-1">
+        발음: 음고이, 짜우 임사이
+      </div>
+      <div id="modal-phrase-meaning" class="text-sm text-slate-600 mb-6">
+        고수는 빼주세요!
+      </div>
+      <button onclick="closePhraseModal()" class="w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-sm">
+        닫기
+      </button>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- TOAST NOTIFICATION                                                -->
+  <!-- ================================================================= -->
+  <div id="toast-container" class="fixed bottom-20 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- ================================================================= -->
+  <!-- APPLICATION JAVASCRIPT                                            -->
+  <!-- ================================================================= -->
+  <script>
+    /**
+     * 1. CURATED HONG KONG PLACES DATABASE (24 Real Spots with Accurate Coordinates)
+     */
+    const INITIAL_PLACES = [
+      {
+        id: 'hk-1',
+        name: '베이크하우스 (Bakehouse 소호/센트럴)',
+        nameEn: 'Bakehouse Central SoHo',
+        district: '센트럴/소호',
+        category: '인스타 바이럴 디저트/카페',
+        rating: 4.6,
+        reviews: '6,800+',
+        viralTags: ['인스타바이럴', '구글평점TOP', '여행사필수'],
+        hashtags: ['#인스타바이럴1위', '#사워도우에그타르트', '#오픈런필수'],
+        signature: '사워도우 에그타르트 (HK$ 12.5), 크루아상',
+        priceHKD: 50,
+        hours: '08:00 - 21:00',
+        tip: '오전 8시 오픈런 또는 오전 11시경 갓 나온 타르트 타이밍 노리기! 6구 박스로 포장해 소호 거리를 산책하며 먹는 것을 추천합니다.',
+        lat: 22.2816,
+        lng: 114.1528,
+        recommendedDay: 2,
+        recommendedTime: '09:30'
+      },
+      {
+        id: 'hk-2',
+        name: '침차이키 (Tsim Chai Kee)',
+        nameEn: 'Tsim Chai Kee Noodle Central',
+        district: '센트럴/소호',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.3,
+        reviews: '7,400+',
+        viralTags: ['미슐랭노포', '여행사필수'],
+        hashtags: ['#미슐랭빕구르망', '#장국영단골', '#새우완탕면'],
+        signature: '3종 토핑 완탕면 (새우완탕+소고기+생선완자)',
+        priceHKD: 55,
+        hours: '11:00 - 21:30',
+        tip: '탱글탱글한 대왕 새우 완탕과 꼬들한 에그누들의 조화! 테이블에 비치된 매콤한 칠리소스를 살짝 곁들이면 감칠맛이 폭발합니다.',
+        lat: 22.2827,
+        lng: 114.1552,
+        recommendedDay: 2,
+        recommendedTime: '12:00'
+      },
+      {
+        id: 'hk-3',
+        name: '싱흥유엔 (Sing Heung Yuen)',
+        nameEn: 'Sing Heung Yuen Central',
+        district: '센트럴/소호',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.2,
+        reviews: '3,900+',
+        viralTags: ['미슐랭노포', '인스타바이럴'],
+        hashtags: ['#스푸파백종원', '#토마토라면', '#다이파이동노포'],
+        signature: '소고기 토마토 계란 라면 + 연유 크리스피 번 + 동윤영',
+        priceHKD: 65,
+        hours: '08:00 - 15:30 (일요일 휴무)',
+        tip: '백종원 스트리트 푸드 파이터 방영 맛집! 야외 노점(다이파이동) 감성이며 바삭한 연유 크리스피 번을 반드시 함께 주문하세요. (현금 준비 필수)',
+        lat: 22.2842,
+        lng: 114.1525,
+        recommendedDay: 2,
+        recommendedTime: '08:30'
+      },
+      {
+        id: 'hk-4',
+        name: '카우키 레스토랑 (Kau Kee)',
+        nameEn: 'Kau Kee Restaurant Gough Street',
+        district: '센트럴/소호',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.1,
+        reviews: '5,200+',
+        viralTags: ['미슐랭노포', '인스타바이럴'],
+        hashtags: ['#양조위단골', '#카레소고기국수', '#중독성갑'],
+        signature: '소고기 안심 맑은 국수 (2번) + 카레 소고기 이부면 (14번)',
+        priceHKD: 90,
+        hours: '12:30 - 22:30 (일요일 휴무)',
+        tip: '싱흥유엔 바로 맞은편! 진한 육수의 맑은 소고기 국수와 중독성 강한 카레 이부면(E-fu noodle) 조합이 진리입니다. (오직 현금 결제만 가능)',
+        lat: 22.2844,
+        lng: 114.1524,
+        recommendedDay: 2,
+        recommendedTime: '13:00'
+      },
+      {
+        id: 'hk-5',
+        name: '오스트레일리아 데어리 컴퍼니',
+        nameEn: 'Australia Dairy Company Jordan',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.3,
+        reviews: '9,800+',
+        viralTags: ['미슐랭노포', '인스타바이럴', '여행사필수'],
+        hashtags: ['#인생스크램블에그', '#홍콩차찬탱', '#우유푸딩'],
+        signature: '스크램블 에그 토스트 + 마카로니 스프 조식 세트 + 우유 푸딩',
+        priceHKD: 65,
+        hours: '07:30 - 22:00 (목요일 휴무)',
+        tip: '줄이 길어도 회전율이 우주급으로 빠릅니다! 구름처럼 몽글몽글한 스크램블 에그 토스트와 고소한 우유 푸딩은 무조건 맛보세요.',
+        lat: 22.3046,
+        lng: 114.1705,
+        recommendedDay: 3,
+        recommendedTime: '09:00'
+      },
+      {
+        id: 'hk-6',
+        name: '딤딤섬 몽콕 본점 (Dim Dim Sum)',
+        nameEn: 'Dim Dim Sum Mong Kok',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.4,
+        reviews: '4,600+',
+        viralTags: ['구글평점TOP', '미슐랭노포'],
+        hashtags: ['#가성비딤섬', '#새우하가우', '#돼지커스터드번'],
+        signature: '크리스피 창펀, 통새우 하가우, 가지 딤섬, 돼지 모양 커스터드 번',
+        priceHKD: 110,
+        hours: '10:00 - 23:00',
+        tip: '한국어 메뉴판이 잘 구비되어 있어 주문이 편리합니다. 안이 바삭한 크리스피 새우 창펀과 통통한 하가우는 필수 주문 메뉴!',
+        lat: 22.3177,
+        lng: 114.1725,
+        recommendedDay: 3,
+        recommendedTime: '12:30'
+      },
+      {
+        id: 'hk-7',
+        name: '원 딤섬 (One Dim Sum)',
+        nameEn: 'One Dim Sum Prince Edward',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.4,
+        reviews: '6,100+',
+        viralTags: ['구글평점TOP', '미슐랭노포'],
+        hashtags: ['#미슐랭1스타출신', '#가성비최고', '#망고찹쌀떡'],
+        signature: '새우 샤오마이, 하가우, 소고기 창펀, 망고 찹쌀떡 디저트',
+        priceHKD: 100,
+        hours: '09:30 - 22:30',
+        tip: '프린스 에드워드역 인근 미슐랭 출신 가성비 딤섬 성지. 디저트로 나오는 달콤 시원한 망고 찹쌀떡까지 완벽한 코스로 즐겨보세요.',
+        lat: 22.3255,
+        lng: 114.1688,
+        recommendedDay: 3,
+        recommendedTime: '13:30'
+      },
+      {
+        id: 'hk-8',
+        name: '상하이 라오라오 (Shanghai Lao Lao)',
+        nameEn: 'Shanghai Lao Lao Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.5,
+        reviews: '3,200+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#인생탄탄면', '#육즙샤오롱바오', '#쾌적한맛집'],
+        signature: '땅콩소스 탄탄면, 수제 샤오롱바오, 매콤 구수계, 볶음밥',
+        priceHKD: 140,
+        hours: '11:30 - 22:30',
+        tip: '침사추이 스타페리 선착장/하버시티 인근으로 접근성 최고! 고소하고 진한 탄탄면 국물이 한국인 입맛에 100% 맞습니다.',
+        lat: 22.2946,
+        lng: 114.1692,
+        recommendedDay: 1,
+        recommendedTime: '12:30'
+      },
+      {
+        id: 'hk-9',
+        name: '얏록 (Yat Lok 거위구이)',
+        nameEn: 'Yat Lok Restaurant Central',
+        district: '센트럴/소호',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.2,
+        reviews: '5,900+',
+        viralTags: ['미슐랭노포', '여행사필수'],
+        hashtags: ['#미슐랭1스타', '#광둥식거위구이', '#겉바속촉'],
+        signature: '로스트 구스(거위 다리살) 라이스 또는 라이스 누들',
+        priceHKD: 120,
+        hours: '10:00 - 20:30 (일요일 휴무)',
+        tip: '바삭하고 윤기 흐르는 거위 껍질과 촉촉한 속살을 새콤달콤한 매실 소스에 찍어 드세요. 오후 2~4시 사이에 방문하면 웨이팅이 짧습니다.',
+        lat: 22.2830,
+        lng: 114.1558,
+        recommendedDay: 2,
+        recommendedTime: '17:30'
+      },
+      {
+        id: 'hk-10',
+        name: '란퐁유엔 (Lan Fong Yuen)',
+        nameEn: 'Lan Fong Yuen Central',
+        district: '센트럴/소호',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.2,
+        reviews: '5,400+',
+        viralTags: ['미슐랭노포', '인스타바이럴', '여행사필수'],
+        hashtags: ['#원조스타킹밀크티', '#프렌치토스트', '#중경삼림감성'],
+        signature: '실크 스타킹 아이스 밀크티 + 카야 버터 프렌치 토스트',
+        priceHKD: 70,
+        hours: '07:30 - 18:00 (일요일 휴무)',
+        tip: '미드레벨 에스컬레이터 바로 옆! 진하고 쌉싸름한 원조 밀크티와 달콤 바삭한 프렌치 토스트로 당 충전하기 딱 좋습니다.',
+        lat: 22.2827,
+        lng: 114.1538,
+        recommendedDay: 2,
+        recommendedTime: '15:00'
+      },
+      {
+        id: 'hk-11',
+        name: '타이청 베이커리 (Tai Cheong Bakery)',
+        nameEn: 'Tai Cheong Bakery Lyndhurst Terrace',
+        district: '센트럴/소호',
+        category: '인스타 바이럴 디저트/카페',
+        rating: 4.3,
+        reviews: '3,800+',
+        viralTags: ['미슐랭노포', '여행사필수'],
+        hashtags: ['#70년전통에그타르트', '#쿠키타르트시트', '#베이크하우스비교'],
+        signature: '전통 쿠키 도우 에그타르트 (HK$ 12)',
+        priceHKD: 25,
+        hours: '08:00 - 20:30',
+        tip: '베이크하우스가 바삭한 페스트리 식감이라면, 타이청은 고소한 쿠키 도우에 푸딩처럼 부드러운 커스터드가 특징! 두 곳을 비교 시식해 보세요.',
+        lat: 22.2826,
+        lng: 114.1541,
+        recommendedDay: 2,
+        recommendedTime: '15:40'
+      },
+      {
+        id: 'hk-12',
+        name: '빅토리아 피크 & 피크트램 (Sky Terrace 428)',
+        nameEn: 'Victoria Peak Tram Sky Terrace 428',
+        district: '센트럴/소호',
+        category: '필수 랜드마크/야경',
+        rating: 4.7,
+        reviews: '34,000+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#세계3대야경', '#피크트램오른쪽좌석', '#백만불짜리야경'],
+        signature: '6세대 그린 피크트램 탑승 & 스카이 테라스 428 루프탑 전망대',
+        priceHKD: 148,
+        hours: '07:30 - 23:00',
+        tip: '피크트램 올라갈 때는 진행 방향 오른쪽 좌석에 앉아야 홍콩 빌딩 숲 뷰가 보입니다! 일몰 45분 전 도착해 노을과 야경을 모두 감상하세요.',
+        lat: 22.2759,
+        lng: 114.1455,
+        recommendedDay: 2,
+        recommendedTime: '19:00'
+      },
+      {
+        id: 'hk-13',
+        name: '빅토리아 하버 & 스타의 거리 (심포니 오브 라이트)',
+        nameEn: 'Avenue of Stars Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '필수 랜드마크/야경',
+        rating: 4.8,
+        reviews: '42,000+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#심포니오브라이트', '#밤8시레이저쇼', '#홍콩야경1번지'],
+        signature: '매일 밤 20:00 심포니 오브 라이트 공연 & 홍콩 배우 핸드프린팅 산책로',
+        priceHKD: 0,
+        hours: '24시간 개방 (공연 20:00 ~ 20:10)',
+        tip: '저녁 7시 40분쯤 스타의 거리 난간 쪽 자리를 선점하세요. 홍콩섬의 마천루 네온사인이 바다에 비치는 풍경만으로도 가슴이 벅차오릅니다.',
+        lat: 22.2932,
+        lng: 114.1741,
+        recommendedDay: 1,
+        recommendedTime: '20:00'
+      },
+      {
+        id: 'hk-14',
+        name: '스타페리 (Star Ferry 침사추이 ↔ 센트럴)',
+        nameEn: 'Star Ferry Pier Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '필수 랜드마크/야경',
+        rating: 4.8,
+        reviews: '28,000+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#단돈천원의행복', '#내셔널지오그래픽선정', '#빅토리아하버횡단'],
+        signature: '스타페리 2층(Upper Deck) 탑승하여 빅토리아 하버 건너기',
+        priceHKD: 6,
+        hours: '06:30 - 23:30 (수시 운항)',
+        tip: 'MTR 지하철 대신 스타페리 2층(Upper Deck)을 타세요! 단돈 HK$ 5~6.5로 10분간 최고의 하버 뷰 크루즈를 즐길 수 있습니다.',
+        lat: 22.2938,
+        lng: 114.1687,
+        recommendedDay: 1,
+        recommendedTime: '18:30'
+      },
+      {
+        id: 'hk-15',
+        name: '미드레벨 에스컬레이터 & 소호 벽화거리',
+        nameEn: 'Central Mid-Levels Escalator and SoHo',
+        district: '센트럴/소호',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.5,
+        reviews: '19,000+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#중경삼림촬영지', '#덩라우벽화', '#소호골목투어'],
+        signature: '세계 최장 야외 에스컬레이터 탑승 & گراham St(그레이엄 스트리트) 벽화 인증샷',
+        priceHKD: 0,
+        hours: '10:30 - 24:00 (상행 운행 기준)',
+        tip: '오전 10시까지는 출근용 하행(내려오는 방향)으로만 운행하고, 10시 30분부터 상행(올라가는 방향)으로 바뀝니다! 올라갈 땐 에스컬레이터, 내려올 땐 골목 산책 추천.',
+        lat: 22.2824,
+        lng: 114.1544,
+        recommendedDay: 2,
+        recommendedTime: '10:45'
+      },
+      {
+        id: 'hk-16',
+        name: '익청빌딩 (Yick Cheong / Monster Building)',
+        nameEn: 'Yick Cheong Building Quarry Bay',
+        district: '코즈웨이베이/동부',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.3,
+        reviews: '11,500+',
+        viralTags: ['인스타바이럴', '여행사필수'],
+        hashtags: ['#트랜스포머촬영지', '#압도적밀도감', '#인스타인생샷'],
+        signature: 'ㄷ자 형태의 초고밀도 아파트를 광각 렌즈로 올려다보며 찍는 시그니처 샷',
+        priceHKD: 0,
+        hours: '09:00 - 19:00 (주민 배려 정숙 시간 준수)',
+        tip: '실제 주민들이 거주하는 아파트이므로 조용히 매너를 지켜 촬영하세요. 1층에 있는 % 아라비카 커피 익청빌딩점에서 잠시 쉬어가기 좋습니다.',
+        lat: 22.2839,
+        lng: 114.2122,
+        recommendedDay: 3,
+        recommendedTime: '15:30'
+      },
+      {
+        id: 'hk-17',
+        name: '초이홍 아파트 (Choi Hung Estate)',
+        nameEn: 'Choi Hung Estate Basketball Court',
+        district: '몽콕/야우마테이',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.3,
+        reviews: '9,100+',
+        viralTags: ['인스타바이럴', '여행사필수'],
+        hashtags: ['#무지개아파트', '#파스텔농구장', '#청량스냅명소'],
+        signature: '주차장 옥상 무지개빛 아파트 배경 농구 코트 & 야자수 포토존',
+        priceHKD: 0,
+        hours: '08:00 - 18:00 (햇살 좋은 오전~오후 추천)',
+        tip: '초이홍역 C4 출구로 나와 주차장 건물 3층 옥상 농구장으로 올라가면 바로 파스텔톤 무지개 아파트가 펼쳐집니다. 재개발 전 꼭 다녀오세요!',
+        lat: 22.3361,
+        lng: 114.2063,
+        recommendedDay: 3,
+        recommendedTime: '10:45'
+      },
+      {
+        id: 'hk-18',
+        name: '타이쿤 & 올드 베일리 거리 (Tai Kwun)',
+        nameEn: 'Tai Kwun Centre for Heritage and Arts',
+        district: '센트럴/소호',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.6,
+        reviews: '14,200+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#옛경찰서감옥개조', '#트렌디복합문화공간', '#소호바로옆'],
+        signature: '콜로니얼 양식 붉은 벽돌 광장, 무료 현대미술 전시, 분위기 좋은 루프탑 바',
+        priceHKD: 0,
+        hours: '08:00 - 23:00',
+        tip: '미드레벨 에스컬레이터에서 연결 통로로 바로 이어집니다! 무료 입장이며 깨끗한 화장실과 세련된 카페·바가 많아 휴식 코스로 최고입니다.',
+        lat: 22.2814,
+        lng: 114.1541,
+        recommendedDay: 2,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-19',
+        name: '서구룡 문화지구 & M+ 뮤지엄',
+        nameEn: 'M+ Museum West Kowloon Cultural District',
+        district: '침사추이/구룡',
+        category: '필수 랜드마크/야경',
+        rating: 4.7,
+        reviews: '12,400+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#요즘홍콩최고핫플', '#M플러스뮤지엄', '#일몰피크닉'],
+        signature: '아시아 최대 시각문화 미술관 M+ & 바다 앞 잔디밭 일몰 산책로',
+        priceHKD: 120,
+        hours: '10:00 - 18:00 (금요일은 22:00까지, 월요일 휴관)',
+        tip: '최근 홍콩 MZ세대와 여행자들에게 가장 사랑받는 노을 명소! 미술관 관람 후 해 질 녘 수변 공원 벤치에서 바라보는 홍콩섬 스카이라인이 예술입니다.',
+        lat: 22.3011,
+        lng: 114.1591,
+        recommendedDay: 1,
+        recommendedTime: '16:00'
+      },
+      {
+        id: 'hk-20',
+        name: '홍콩 디즈니랜드 (World of Frozen)',
+        nameEn: 'Hong Kong Disneyland Resort',
+        district: '란타우/디즈니',
+        category: '필수 랜드마크/야경',
+        rating: 4.8,
+        reviews: '58,000+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#세계최초겨울왕국테마존', '#모멘터스불꽃놀이', '#그리즐리굴치'],
+        signature: '아렌델 왕국(프로즌 에버 애프터), 그리즐리 굴치 광산열차, 밤하늘 모멘터스 쇼',
+        priceHKD: 699,
+        hours: '10:00 - 21:00',
+        tip: '입장하자마자 겨울왕국 테마존(World of Frozen)으로 직행하세요! 폐장 직전 성 앞에서 펼쳐지는 드론·레이저·불꽃쇼 "모멘터스"는 평생 잊지 못할 감동입니다.',
+        lat: 22.3130,
+        lng: 114.0413,
+        recommendedDay: 4,
+        recommendedTime: '10:30'
+      },
+      {
+        id: 'hk-21',
+        name: '옹핑 360 크리스탈 케이블카 & 빅부다',
+        nameEn: 'Ngong Ping 360 Cable Car and Tian Tan Buddha',
+        district: '란타우/디즈니',
+        category: '필수 랜드마크/야경',
+        rating: 4.7,
+        reviews: '26,000+',
+        viralTags: ['구글평점TOP', '여행사필수'],
+        hashtags: ['#바닥투명케이블카', '#포린사원청동좌불상', '#시티게이트아울렛'],
+        signature: '바닥이 투명한 크리스탈 캐빈 25분 탑승 & 34m 높이 거대 청동 좌불상',
+        priceHKD: 290,
+        hours: '10:00 - 18:00',
+        tip: '공항 근처 통충(Tung Chung)역에서 출발하므로 첫날이나 마지막 날 공항 가기 전 시티게이트 아울렛 짐 보관과 묶어 다녀오면 동선이 완벽합니다.',
+        lat: 22.2540,
+        lng: 113.9050,
+        recommendedDay: 4,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-22',
+        name: '몽콕 야시장 & 템플 스트리트 야식 투어',
+        nameEn: 'Ladies Market Mong Kok and Temple Street Night Market',
+        district: '몽콕/야우마테이',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.2,
+        reviews: '21,000+',
+        viralTags: ['인스타바이럴', '여행사필수'],
+        hashtags: ['#홍콩네온사인야시장', '#레이디스마켓', '#뽀짜이판야식'],
+        signature: '기념품 마그넷 흥정 & 템플 스트리트 스파이시 크랩·뽀짜이판(솥밥)+굴전 야식',
+        priceHKD: 120,
+        hours: '17:00 - 23:30',
+        tip: '레이디스 마켓에서 귀여운 홍콩 택시/트램 자석을 고르고, 야우마테이 힝키 레스토랑(Hing Kee)에서 솥밥과 바삭한 굴전에 맥주 한잔으로 하루를 마무리하세요!',
+        lat: 22.3186,
+        lng: 114.1707,
+        recommendedDay: 3,
+        recommendedTime: '20:00'
+      },
+      {
+        id: 'hk-23',
+        name: '1881 헤리티지 & 하버시티 쇼핑몰',
+        nameEn: '1881 Heritage and Harbour City Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.5,
+        reviews: '16,500+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#유럽풍클래식건축', '#침사추이포토존', '#하버시티오션터미널'],
+        signature: '옛 해양경찰 본부 빅토리아 양식 정원 스냅 촬영 & 하버시티 오션뷰 테라스',
+        priceHKD: 0,
+        hours: '10:00 - 22:00',
+        tip: '침사추이역 E번 출구 도보 3분! 낮에도 우아하지만 밤에 조명이 켜지면 유럽 궁전 같은 분위기에서 인생샷을 남길 수 있습니다.',
+        lat: 22.2956,
+        lng: 114.1701,
+        recommendedDay: 1,
+        recommendedTime: '14:30'
+      },
+      {
+        id: 'hk-24',
+        name: '아라비카 커피 (% Arabica 케네디타운 / 스타페리)',
+        nameEn: 'Arabica Coffee Kennedy Town / Star Ferry',
+        district: '센트럴/소호',
+        category: '인스타 바이럴 디저트/카페',
+        rating: 4.5,
+        reviews: '4,900+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#케네디타운오션뷰', '#교토라떼', '#인스타감성카페'],
+        signature: '달콤 고소한 아이스 교토 라떼 (Kyoto Latte) & 스패니쉬 라떼',
+        priceHKD: 55,
+        hours: '08:30 - 19:00',
+        tip: '케네디타운 해변점 앞 도로/농구장에서 커피 컵을 들고 푸른 바다와 페리를 배경으로 찍는 사진이 인스타그램에서 가장 핫합니다!',
+        lat: 22.2837,
+        lng: 114.1277,
+        recommendedDay: 2,
+        recommendedTime: '16:30'
+      }
+    ];
+
+    /**
+     * 2. PRE-TRIP SURVIVAL CHECKLIST DATA
+     */
+    const INITIAL_CHECKLIST = [
+      { id: 'chk-1', title: '옥토퍼스 카드 (실물 대여 또는 아이폰 애플페이 충전)', desc: 'MTR 지하철, 스타페리, 버스, 2층 트램, 편의점 결제까지 만능 필수품', done: true },
+      { id: 'chk-2', title: '홍콩 달러(HKD) 현금 지폐 준비 (약 500~1,000 HKD)', desc: '카우키, 싱흥유엔, 런던 레스토랑, 마카오 페리 터미널 일부 노포는 현금만 가능!', done: true },
+      { id: 'chk-3', title: '영국식 3구 멀티 어댑터 (220V G타입)', desc: '홍콩 콘센트는 네모난 3구 형태이므로 멀티 어댑터를 꼭 챙기세요.', done: false },
+      { id: 'chk-4', title: '트래블월렛 / 트래블로그 카드 및 해외결제 활성화', desc: '하버시티, 미슐랭 레스토랑, 베이크하우스, 디즈니랜드에서 수수료 없이 터치 결제', done: false },
+      { id: 'chk-5', title: '피크트램 패스트트랙 / AEL 공항철도 / 디즈니랜드 사전 예매', desc: '현장 매표소 대기 시간을 1시간 이상 아낄 수 있는 QR 바우처 미리 준비', done: false },
+      { id: 'chk-6', title: '가벼운 가디건·바람막이 & 휴대용 티슈/물티슈', desc: '홍콩 실내 에어컨은 매우 강하고, 로컬 식당에서는 휴지를 유료로 파는 곳이 많습니다.', done: false }
+    ];
+
+    /**
+     * 3. GLOBAL APPLICATION STATE
+     */
+    let appState = {
+      currentPage: 1,
+      travelerName: '홍콩 러버',
+      tripNights: 3,
+      tripDays: 4,
+      tripDurationLabel: '3박 4일',
+      tripVibe: '미식 & 인스타 핫플 정복',
+      exchangeRate: 180,
+      flight: {
+        startDate: '2025-05-01',
+        endDate: '2025-05-04',
+        outboundPreset: '09:00|11:55|3시간 55분',
+        inboundPreset: '17:50|22:25|3시간 35분',
+        day1CityArrivalTime: '13:30',
+        lastDayAirportLeaveTime: '14:10',
+        netSightseeingHours: 41
+      },
+      transport: {
+        hotelArea: '침사추이/구룡',
+        pax: 1,
+        luggage: 1,
+        priority: 'balanced',
+        recommendedAirportMode: '2층 공항버스 A21 (Cityflyer)',
+        airportRoundTripHKDPerPerson: 66,
+        totalTransportHKDPerPerson: 186
+      },
+      filters: {
+        district: 'ALL',
+        category: 'ALL',
+        viral: 'ALL',
+        selectedOnly: false
+      },
+      mapMode: 'ALL',
+      builderDayView: 'ALL',
+      places: [...INITIAL_PLACES],
+      // selectedItems holds { id, day, time, budgetHKD, memo }
+      selectedItems: [],
+      checklist: [...INITIAL_CHECKLIST]
+    };
+
+    // Leaflet Map instances
+    let mapInstance = null;
+    let mapMarkersLayer = null;
+    let mapPolylineLayer = null;
+
+    /**
+     * 4. INITIALIZATION & LOCAL STORAGE
+     */
+    window.onload = function () {
+      loadFromLocalStorage();
+      calculateFlightAndDuration(true);
+      renderAirportTransportComparison();
+      updateP2PRoute();
+
+      // If user has 0 selected places on first visit, pre-select a balanced 12-spot starter pack
+      if (appState.selectedItems.length === 0) {
+        applyPresetCourse('classic', true);
+      } else {
+        syncAllViews();
+      }
+      initLeafletMap();
+      switchPage(1);
+    };
+
+    function saveToLocalStorage(showToastMsg = false) {
+      try {
+        localStorage.setItem('hk_bespoke_travel_planner_v2', JSON.stringify({
+          travelerName: appState.travelerName,
+          tripNights: appState.tripNights,
+          tripDays: appState.tripDays,
+          tripDurationLabel: appState.tripDurationLabel,
+          tripVibe: appState.tripVibe,
+          exchangeRate: appState.exchangeRate,
+          flight: appState.flight,
+          transport: appState.transport,
+          places: appState.places,
+          selectedItems: appState.selectedItems,
+          checklist: appState.checklist
+        }));
+        if (showToastMsg) {
+          showToast('💾 내 브라우저에 항공·교통·일정 계획서가 안전하게 저장되었습니다!');
+        }
+      } catch (e) {
+        console.error('Storage save error:', e);
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem('hk_bespoke_travel_planner_v2') || localStorage.getItem('hk_bespoke_travel_planner_v1');
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed.travelerName) appState.travelerName = parsed.travelerName;
+        if (parsed.tripNights !== undefined) appState.tripNights = parsed.tripNights;
+        if (parsed.tripDays) appState.tripDays = parsed.tripDays;
+        if (parsed.tripDurationLabel) appState.tripDurationLabel = parsed.tripDurationLabel;
+        if (parsed.tripVibe) appState.tripVibe = parsed.tripVibe;
+        if (parsed.exchangeRate) appState.exchangeRate = parsed.exchangeRate;
+        if (parsed.flight) appState.flight = { ...appState.flight, ...parsed.flight };
+        if (parsed.transport) appState.transport = { ...appState.transport, ...parsed.transport };
+        if (Array.isArray(parsed.places) && parsed.places.length >= 24) {
+          appState.places = parsed.places;
+        }
+        if (Array.isArray(parsed.selectedItems)) {
+          appState.selectedItems = parsed.selectedItems;
+        }
+        if (Array.isArray(parsed.checklist)) {
+          appState.checklist = parsed.checklist;
+        }
+
+        // Sync UI inputs
+        document.getElementById('input-traveler-name').value = appState.travelerName;
+        document.getElementById('select-trip-vibe').value = appState.tripVibe;
+        document.getElementById('input-exchange-rate').value = appState.exchangeRate;
+
+        if (document.getElementById('calc-start-date')) {
+          document.getElementById('calc-start-date').value = appState.flight.startDate;
+          document.getElementById('calc-end-date').value = appState.flight.endDate;
+          document.getElementById('calc-outbound-preset').value = appState.flight.outboundPreset;
+          document.getElementById('calc-inbound-preset').value = appState.flight.inboundPreset;
+        }
+        if (document.getElementById('sim-hotel-area')) {
+          document.getElementById('sim-hotel-area').value = appState.transport.hotelArea;
+          document.getElementById('sim-pax').value = String(appState.transport.pax);
+          document.getElementById('sim-luggage').value = String(appState.transport.luggage);
+          document.getElementById('sim-priority').value = appState.transport.priority;
+        }
+      } catch (e) {
+        console.error('Storage load error:', e);
+      }
+    }
+
+    /**
+     * 4-B. FLIGHT SCHEDULE & TRIP DURATION (X박 Y일) CALCULATOR
+     */
+    function addMinutesToTimeStr(timeStr, minutesToAdd) {
+      const [hh, mm] = timeStr.split(':').map(Number);
+      let total = hh * 60 + mm + minutesToAdd;
+      total = ((total % 1440) + 1440) % 1440;
+      const nh = String(Math.floor(total / 60)).padStart(2, '0');
+      const nm = String(total % 60).padStart(2, '0');
+      return `${nh}:${nm}`;
+    }
+
+    function calculateFlightAndDuration(silent = false) {
+      const startInput = document.getElementById('calc-start-date');
+      const endInput = document.getElementById('calc-end-date');
+      const outSelect = document.getElementById('calc-outbound-preset');
+      const inSelect = document.getElementById('calc-inbound-preset');
+      if (!startInput || !endInput || !outSelect || !inSelect) return;
+
+      let sDate = new Date(startInput.value);
+      let eDate = new Date(endInput.value);
+
+      if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) return;
+      if (eDate < sDate) {
+        eDate = new Date(sDate.getTime() + 86400000);
+        endInput.value = eDate.toISOString().split('T')[0];
+      }
+
+      const diffDays = Math.round((eDate - sDate) / 86400000);
+      // Cap between 1 night 2 days and 5 nights 6 days for clean itinerary layout
+      const nights = Math.max(1, Math.min(5, diffDays));
+      const days = nights + 1;
+
+      const [outDep, outArr, outFlightTime] = outSelect.value.split('|');
+      const [inDep, inArr, inFlightTime] = inSelect.value.split('|');
+
+      const isRedEyeReturn = inDep.startsWith('00:');
+      const durationLabel = isRedEyeReturn
+        ? `${nights - 1}박 ${days}일 (기내 1박 포함)`
+        : `${nights}박 ${days}일`;
+
+      // Immigration + baggage ~50m + Airport to City ~40m = +90m after landing
+      const cityArrivalTime = addMinutesToTimeStr(outArr, 90);
+      // Leave city ~3h 35m (215m) before flight departure
+      const cityLeaveTime = addMinutesToTimeStr(inDep, -215);
+
+      // Estimate usable sightseeing hours
+      const [arrH] = cityArrivalTime.split(':').map(Number);
+      const [leaveH] = cityLeaveTime.split(':').map(Number);
+      const day1Usable = outArr.startsWith('01:') ? 0 : Math.max(2, 22 - arrH);
+      const lastDayUsable = isRedEyeReturn ? 12 : Math.max(1, leaveH - 9);
+      const middleDaysUsable = Math.max(0, days - 2) * 12;
+      const netHours = day1Usable + middleDaysUsable + lastDayUsable;
+
+      appState.tripNights = nights;
+      appState.tripDays = days;
+      appState.tripDurationLabel = durationLabel;
+      appState.flight = {
+        startDate: startInput.value,
+        endDate: endInput.value,
+        outboundPreset: outSelect.value,
+        inboundPreset: inSelect.value,
+        day1CityArrivalTime: cityArrivalTime,
+        lastDayAirportLeaveTime: cityLeaveTime,
+        netSightseeingHours: netHours
+      };
+
+      // Re-clamp any scheduled items that exceed the new days count
+      appState.selectedItems.forEach(item => {
+        if (item.day > days) item.day = days;
+      });
+
+      // Update Calculator UI Cards
+      document.getElementById('calc-result-duration').textContent = `${nights}박 ${days}일`;
+      document.getElementById('calc-result-duration-sub').textContent = isRedEyeReturn
+        ? `심야 귀국편 반영 · Day 1 ~ Day ${days} 일정표`
+        : `일정표 Day 1 ~ Day ${days} 자동 구성`;
+
+      document.getElementById('calc-result-day1-city').textContent = outArr.startsWith('01:')
+        ? `익일 02:30 (심야 도착)`
+        : `Day 1 ${cityArrivalTime}경`;
+      document.getElementById('calc-result-day1-desc').textContent =
+        `홍콩 ${outArr} 착륙 + 입국심사·공항이동 약 90분`;
+
+      document.getElementById('calc-result-lastday-leave').textContent = isRedEyeReturn
+        ? `전날 밤 21:20경`
+        : `Day ${days} ${cityLeaveTime}경`;
+      document.getElementById('calc-result-lastday-desc').textContent =
+        `귀국편(${inDep}) 출발 약 3시간 30분 전 시내 출발`;
+
+      document.getElementById('calc-result-net-hours').textContent = `약 ${netHours}시간`;
+      document.getElementById('calc-result-net-tip').textContent =
+        `가는편 ${outFlightTime} / 오는편 ${inFlightTime} 소요`;
+
+      renderAirportTransportComparison();
+      syncAllViews();
+      saveToLocalStorage(false);
+
+      if (!silent) {
+        showToast(`✈️ 여행 기간이 ${nights}박 ${days}일(순수 관광 약 ${netHours}시간)로 계산되었습니다!`);
+      }
+    }
+
+    /**
+     * 4-C. AIRPORT <-> CITY TRANSPORT SIMULATOR & COMPARISON
+     */
+    function renderAirportTransportComparison() {
+      const areaEl = document.getElementById('sim-hotel-area');
+      const paxEl = document.getElementById('sim-pax');
+      const lugEl = document.getElementById('sim-luggage');
+      const priEl = document.getElementById('sim-priority');
+      if (!areaEl || !paxEl || !lugEl || !priEl) return;
+
+      const area = areaEl.value;
+      const pax = parseInt(paxEl.value, 10) || 1;
+      const luggage = parseInt(lugEl.value, 10) || 0;
+      const priority = priEl.value;
+      const rate = appState.exchangeRate || 180;
+
+      appState.transport.hotelArea = area;
+      appState.transport.pax = pax;
+      appState.transport.luggage = luggage;
+      appState.transport.priority = priority;
+
+      // 1. AEL Calculations
+      const isIsland = (area === '센트럴/소호' || area === '코즈웨이베이/동부');
+      const aelStation = isIsland ? '홍콩역(센트럴)' : '구룡역';
+      const aelTimeMin = isIsland ? 24 : 22;
+      // Group discount approximation (1p online ~95/105, 2-4p group ~75/85 per person)
+      const aelOneWayPerPerson = pax >= 2 ? (isIsland ? 85 : 75) : (isIsland ? 105 : 95);
+      const aelTotalOneWay = aelOneWayPerPerson * pax;
+
+      // 2. Cityflyer Bus Calculations
+      let busRoute = 'A21';
+      let busFareOneWay = 34.6;
+      let busTimeMin = 55;
+      if (area === '센트럴/소호' || area === '코즈웨이베이/동부') {
+        busRoute = 'A11';
+        busFareOneWay = 41.9;
+        busTimeMin = 45;
+      } else if (area === '몽콕/야우마테이') {
+        busRoute = 'A21';
+        busFareOneWay = 34.6;
+        busTimeMin = 45;
+      }
+      const busTotalOneWay = Math.round(busFareOneWay * pax);
+
+      // 3. Red Taxi Calculations
+      let taxiBase = 290;
+      let taxiTimeMin = 35;
+      if (area === '센트럴/소호') { taxiBase = 360; taxiTimeMin = 35; }
+      else if (area === '코즈웨이베이/동부') { taxiBase = 380; taxiTimeMin = 40; }
+      else if (area === '몽콕/야우마테이') { taxiBase = 270; taxiTimeMin = 32; }
+      const taxiLuggageFee = luggage * 6;
+      const taxiTotalOneWay = taxiBase + taxiLuggageFee;
+      const taxiPerPersonOneWay = Math.round(taxiTotalOneWay / pax);
+
+      // Determine AI #1 Recommendation
+      const isLateNightArrival = appState.flight.outboundPreset.includes('01:15') || appState.flight.outboundPreset.includes('22:40');
+      let bestKey = 'BUS';
+      let bestTitle = `2층 공항버스 ${busRoute}번 (Cityflyer)`;
+      let bestReason = `${area} 주요 호텔 코앞 정류장까지 환승 없이 한 번에 이동하며, 1인 HK$ ${busFareOneWay}로 가성비가 가장 뛰어납니다!`;
+      let bestOneWayPerPerson = Math.round(busFareOneWay);
+
+      if (priority === 'speed' || (area === '센트럴/소호' && priority === 'balanced')) {
+        bestKey = 'AEL';
+        bestTitle = `AEL 공항철도 (${aelStation} 하차)`;
+        bestReason = `공항에서 ${aelStation}까지 단 ${aelTimeMin}분 주파! 귀국 날 도심 공항터미널 얼리 체크인(위탁수하물 사전 접수) 혜택까지 누릴 수 있습니다.`;
+        bestOneWayPerPerson = aelOneWayPerPerson;
+      } else if (priority === 'comfort' || pax >= 3 || isLateNightArrival) {
+        bestKey = 'TAXI';
+        bestTitle = `홍콩 레드 택시 / 우버 (Door-to-Door)`;
+        bestReason = `${pax}인 동행 & 캐리어 ${luggage}개 기준 1인당 약 HK$ ${taxiPerPersonOneWay}로 AEL과 큰 차이 없이 숙소 로비 앞까지 ${taxiTimeMin}분 만에 가장 편하게 도착합니다.`;
+        bestOneWayPerPerson = taxiPerPersonOneWay;
+      }
+
+      // Save transport cost to state (Round-trip airport + ~HKD 30/day local MTR/Ferry/Tram)
+      const roundTripAirportHKD = bestOneWayPerPerson * 2;
+      const dailyLocalHKD = 30 * appState.tripDays;
+      const totalTransportHKD = roundTripAirportHKD + dailyLocalHKD;
+
+      appState.transport.recommendedAirportMode = bestTitle;
+      appState.transport.airportRoundTripHKDPerPerson = roundTripAirportHKD;
+      appState.transport.totalTransportHKDPerPerson = totalTransportHKD;
+
+      // Render Best Recommendation Banner
+      const bannerEl = document.getElementById('airport-best-banner');
+      bannerEl.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-extrabold">
+              <i class="fa-solid fa-crown"></i> AI 맞춤 1순위 추천
+            </div>
+            <h4 class="text-lg sm:text-xl font-black text-white">${bestTitle}</h4>
+            <p class="text-xs sm:text-sm text-slate-300">${bestReason}</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 border border-white/15 text-right shrink-0">
+            <div class="text-[11px] text-slate-300">${pax}인 편도 총합 (1인당 HK$ ${bestOneWayPerPerson})</div>
+            <div class="text-xl font-black text-amber-400">
+              HK$ ${bestOneWayPerPerson * pax}
+              <span class="text-xs text-teal-300 font-bold">(약 ${Math.round(bestOneWayPerPerson * pax * rate).toLocaleString()}원)</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render 3 Comparison Cards
+      const cardsEl = document.getElementById('airport-comparison-cards');
+      cardsEl.innerHTML = `
+        <!-- Card 1: AEL -->
+        <div class="rounded-2xl p-4 border ${bestKey === 'AEL' ? 'border-2 border-rose-500 bg-rose-50/30 ring-4 ring-rose-500/10' : 'border-slate-200 bg-white'} flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-teal-100 text-teal-800">🚀 최단 시간 · 정시성 100%</span>
+              ${bestKey === 'AEL' ? '<span class="text-xs font-black text-rose-600">★ 맞춤 추천</span>' : ''}
+            </div>
+            <h5 class="text-base font-black text-slate-900">1. AEL 공항철도 (${aelStation})</h5>
+            <p class="text-xs text-slate-500 mt-0.5">소요시간: <strong>약 ${aelTimeMin}분</strong> (배차 10~12분)</p>
+            <ul class="mt-3 space-y-1.5 text-xs text-slate-700">
+              <li>• <strong>장점:</strong> 교통체증 제로, 쾌적한 지정 좌석, 홍콩역·구룡역 <strong>도심 얼리 체크인</strong> 가능</li>
+              <li>• <strong>단점:</strong> 역 하차 후 호텔까지 택시 또는 MTR로 1회 환승 필요</li>
+              <li>• <strong>할인팁:</strong> 클룩/KKday 사전 예매 또는 2~4인 그룹티켓 구매 시 최대 30% 할인</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <span class="text-slate-500">1인 편도 약 HK$ ${aelOneWayPerPerson}</span>
+            <span class="font-black text-slate-900">${pax}인 합계 HK$ ${aelTotalOneWay} (${Math.round(aelTotalOneWay * rate).toLocaleString()}원)</span>
+          </div>
+        </div>
+
+        <!-- Card 2: 2층 공항버스 -->
+        <div class="rounded-2xl p-4 border ${bestKey === 'BUS' ? 'border-2 border-rose-500 bg-rose-50/30 ring-4 ring-rose-500/10' : 'border-slate-200 bg-white'} flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-amber-100 text-amber-900">💰 가성비 최고 · 무환승</span>
+              ${bestKey === 'BUS' ? '<span class="text-xs font-black text-rose-600">★ 맞춤 추천</span>' : ''}
+            </div>
+            <h5 class="text-base font-black text-slate-900">2. 2층 공항버스 (${busRoute}번 Cityflyer)</h5>
+            <p class="text-xs text-slate-500 mt-0.5">소요시간: <strong>약 ${busTimeMin}~65분</strong> (배차 15~20분)</p>
+            <ul class="mt-3 space-y-1.5 text-xs text-slate-700">
+              <li>• <strong>장점:</strong> ${area} 주요 호텔 앞 대로변에 바로 정차! 무거운 캐리어 들고 계단/환승할 필요 없음</li>
+              <li>• <strong>뷰 포인트:</strong> 2층 좌석에서 칭마대교와 홍콩 도심 네온사인 감상 (1층 짐칸 CCTV 모니터 제공)</li>
+              <li>• <strong>심야팁:</strong> 새벽 도착 시 <strong>N21 / NA20 / N11</strong> 심야버스가 24시간 운행!</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <span class="text-slate-500">1인 편도 HK$ ${busFareOneWay}</span>
+            <span class="font-black text-slate-900">${pax}인 합계 HK$ ${busTotalOneWay} (${Math.round(busTotalOneWay * rate).toLocaleString()}원)</span>
+          </div>
+        </div>
+
+        <!-- Card 3: 택시 / 우버 -->
+        <div class="rounded-2xl p-4 border ${bestKey === 'TAXI' ? 'border-2 border-rose-500 bg-rose-50/30 ring-4 ring-rose-500/10' : 'border-slate-200 bg-white'} flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-purple-100 text-purple-800">🚕 호텔 문 앞 직행 · 체력 세이브</span>
+              ${bestKey === 'TAXI' ? '<span class="text-xs font-black text-rose-600">★ 맞춤 추천</span>' : ''}
+            </div>
+            <h5 class="text-base font-black text-slate-900">3. 홍콩 레드 택시 & Uber</h5>
+            <p class="text-xs text-slate-500 mt-0.5">소요시간: <strong>약 ${taxiTimeMin}~45분</strong> (대기 없이 즉시 탑승)</p>
+            <ul class="mt-3 space-y-1.5 text-xs text-slate-700">
+              <li>• <strong>장점:</strong> 밤늦게 도착하거나 3~4인 일행일 때 피로도 0%! 호텔 로비 문 앞까지 논스톱 이동</li>
+              <li>• <strong>수하물 요금:</strong> 트렁크에 싣는 캐리어 <strong>1개당 HK$ 6</strong> 추가 (현재 ${luggage}개 = HK$ ${taxiLuggageFee} 반영됨)</li>
+              <li>• <strong>결제팁:</strong> 일반 레드 택시는 <strong>현금(HKD)</strong>만 받는 경우가 많고, 카드 결제를 원하면 <strong>Uber 앱</strong> 호출 추천</li>
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <span class="text-slate-500">1인당 약 HK$ ${taxiPerPersonOneWay}</span>
+            <span class="font-black text-slate-900">차량 1대 총 HK$ ${taxiTotalOneWay} (${Math.round(taxiTotalOneWay * rate).toLocaleString()}원)</span>
+          </div>
+        </div>
+      `;
+
+      // Update Total Transport Budget Box
+      document.getElementById('transport-budget-breakdown').textContent =
+        `공항 왕복(${bestTitle} HK$ ${roundTripAirportHKD}) + ${appState.tripDays}일간 시내 MTR·스타페리·트램(약 HK$ ${dailyLocalHKD})`;
+      document.getElementById('total-transport-hkd').textContent = totalTransportHKD.toLocaleString();
+      document.getElementById('total-transport-krw').textContent = Math.round(totalTransportHKD * rate).toLocaleString();
+    }
+
+    /**
+     * 4-D. POINT-TO-POINT CITY ROUTE CHECKER
+     */
+    function updateP2PRoute() {
+      const fromEl = document.getElementById('p2p-from');
+      const toEl = document.getElementById('p2p-to');
+      const box = document.getElementById('p2p-result-box');
+      if (!fromEl || !toEl || !box) return;
+
+      const from = fromEl.value;
+      const to = toEl.value;
+
+      if (from === to) {
+        box.innerHTML = `<div class="text-slate-600 font-bold">출발지와 도착지가 같습니다. 도보나 미드레벨 에스컬레이터/트램으로 골목 투어를 즐겨보세요!</div>`;
+        return;
+      }
+
+      const routeDB = {
+        '침사추이->센트럴/소호': {
+          fast: '🚇 MTR 췬완선 (침사추이역 → 센트럴역 2정거장) · 약 7분 · HK$ 10.5',
+          scenic: '⛴️ 스타페리 2층 탑승 (침사추이 선착장 → 센트럴 7번 선착장) · 약 9분 · HK$ 5.0~6.5',
+          tip: '낮이나 일몰 시간대에는 무조건 스타페리를 타세요! 센트럴 선착장 내리자마자 육교로 IFC몰·미드레벨 에스컬레이터까지 연결됩니다.'
+        },
+        '침사추이->빅토리아피크': {
+          fast: '⛴️ 스타페리 탑승 후 센트럴 7번 선착장 앞에서 15번 2층 버스 또는 피크트램 환승 · 약 40분',
+          scenic: '🚇 MTR 센트럴역 J2 출구 도보 10분 → 피크트램 탑승 (8분) · HK$ 148(왕복+전망대)',
+          tip: '피크트램 대기 줄이 1시간 이상일 땐 센트럴 선착장 앞 15번 2층 버스(HK$ 12.1)나 3~4인 Uber(약 HK$ 120)가 훨씬 빠릅니다!'
+        },
+        '침사추이->익청빌딩': {
+          fast: '🚇 MTR 췬완선(애드미럴티 환승) → 아일랜드선 타이쿠(Tai Koo)역 B출구 · 약 24분 · HK$ 15.5',
+          scenic: '⛴️ 스타페리 + 홍콩섬 2층 트램(딩딩이) 동쪽행 탑승 · 약 55분 · HK$ 8.3',
+          tip: '빠르게 가려면 MTR 타이쿠역 B출구(도보 3분)를 이용하고, 돌아올 때 트램을 타며 홍콩섬 풍경을 구경하세요.'
+        },
+        '침사추이->초이홍아파트': {
+          fast: '🚇 MTR 췬완선(야우마테이/몽콕 환승) → Kwun Tong선 초이홍(Choi Hung)역 C4 출구 · 약 22분 · HK$ 9.5',
+          scenic: '🚌 침사추이 네이선 로드에서 구룡 시내버스 이용 · 약 35분 · HK$ 7.5',
+          tip: '초이홍역 C4 출구로 나와 바로 앞 주차장 건물 3층 옥상 농구장으로 올라가면 무지개 아파트 포토존입니다.'
+        },
+        '침사추이->디즈니랜드': {
+          fast: '🚇 MTR 오스틴/구룡역 또는 침사추이역 → 라이킹(Lai King) → 서니베이(디즈니선) · 약 38분 · HK$ 24',
+          scenic: '🚕 3~4인 동행 시 레드 택시 / Uber 직행 · 약 25분 · 약 HK$ 230',
+          tip: '서니베이역에서 갈아타는 디즈니랜드 전용 열차는 미키마우스 창문과 손잡이로 꾸며져 있어 포토존 그 자체입니다!'
+        },
+        '센트럴/소호->빅토리아피크': {
+          fast: '🚋 가든 로드 피크트램 터미널 탑승 · 약 8분 · 왕복+스카이테라스 HK$ 148',
+          scenic: '🚌 익스체인지 스퀘어/센트럴 선착장 15번 2층 버스 · 약 35분 · HK$ 12.1',
+          tip: '피크트램 올라갈 때는 진행 방향 오른쪽 좌석에 앉아야 홍콩 마천루 뷰가 한눈에 들어옵니다!'
+        },
+        '센트럴/소호->익청빌딩': {
+          fast: '🚇 MTR 아일랜드선 (센트럴역 → 타이쿠역 직통) · 약 16분 · HK$ 8.5',
+          scenic: '🚋 홍콩섬 2층 트램 (딩딩이 Shau Kei Wan행) · 약 42분 · HK$ 3.3',
+          tip: '트램 2층 맨 앞자리에 앉아 완차이·코즈웨이베이를 지나 쿼리베이(익청빌딩)까지 달리는 코스가 인스타 감성 최고입니다.'
+        }
+      };
+
+      const key = `${from}->${to}`;
+      const revKey = `${to}->${from}`;
+      const info = routeDB[key] || routeDB[revKey] || {
+        fast: `🚇 MTR 지하철 직통/1회 환승 이동 · 약 18~28분 소요 · 약 HK$ 10~15`,
+        scenic: `🚌 2층 시내버스 또는 트램/페리 연계 이동 · 약 30~40분 소요 · 약 HK$ 6~12`,
+        tip: `옥토퍼스 카드 또는 비자/마스터 컨택리스 카드를 개찰구에 바로 태그하면 환율 수수료 없이 즉시 탑승됩니다.`
+      };
+
+      box.innerHTML = `
+        <div class="font-extrabold text-indigo-950 text-xs sm:text-sm">${from} ➔ ${to} 최적 이동 방법</div>
+        <div class="bg-white p-2.5 rounded-xl border border-indigo-100 space-y-1">
+          <div><span class="font-extrabold text-rose-600">[최단 시간]</span> ${info.fast}</div>
+          <div><span class="font-extrabold text-teal-700">[감성/가성비]</span> ${info.scenic}</div>
+        </div>
+        <div class="text-[11px] text-slate-600"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i><strong>환승 꿀팁:</strong> ${info.tip}</div>
+      `;
+    }
+
+    /**
+     * 5. PAGE NAVIGATION (STEP 1 <-> STEP 5)
+     */
+    function switchPage(pageNum) {
+      appState.currentPage = pageNum;
+
+      // Toggle section visibility
+      for (let i = 1; i <= 5; i++) {
+        const sec = document.getElementById(`page-${i}`);
+        const btn = document.getElementById(`step-btn-${i}`);
+        if (!sec || !btn) continue;
+        if (i === pageNum) {
+          sec.classList.add('active');
+          btn.className = 'step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all bg-rose-600 text-white shadow-sm';
+        } else {
+          sec.classList.remove('active');
+          btn.className = 'step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60';
+        }
+      }
+
+      // Update bottom prev/next buttons
+      const prevBtn = document.getElementById('btn-prev-page');
+      const nextLabel = document.getElementById('next-page-label');
+
+      prevBtn.disabled = (pageNum === 1);
+
+      const stepLabels = {
+        1: '다음: 맛집·핫플 24선 담기',
+        2: '다음: 홍콩 지도 & 동선 보기',
+        3: '다음: 일자별 계획서 편집',
+        4: '다음: 최종 트래블 북 & 체크리스트',
+        5: '처음으로: 항공·교통 계산기 보기'
+      };
+      nextLabel.textContent = stepLabels[pageNum];
+
+      // Refresh specific page views
+      if (pageNum === 3) {
+        setTimeout(() => {
+          if (mapInstance) {
+            mapInstance.invalidateSize();
+            renderMapMarkers();
+          }
+        }, 120);
+      } else if (pageNum === 4) {
+        renderItineraryBuilder();
+      } else if (pageNum === 5) {
+        renderFinalTravelBook();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function navigateStep(delta) {
+      if (appState.currentPage === 5 && delta === 1) {
+        switchPage(1);
+        return;
+      }
+      const target = Math.min(5, Math.max(1, appState.currentPage + delta));
+      switchPage(target);
+    }
+
+    /**
+     * 6. SETTINGS & FILTERS
+     */
+    function updateTripSettings() {
+      const nameVal = document.getElementById('input-traveler-name').value.trim() || '홍콩 러버';
+      const vibeVal = document.getElementById('select-trip-vibe').value;
+      const rateVal = parseFloat(document.getElementById('input-exchange-rate').value) || 180;
+
+      appState.travelerName = nameVal;
+      appState.tripVibe = vibeVal;
+      appState.exchangeRate = rateVal;
+
+      renderAirportTransportComparison();
+      syncAllViews();
+      saveToLocalStorage(false);
+    }
+
+    function setFilter(type, value) {
+      appState.filters[type] = value;
+
+      // Update active pill UI
+      if (type === 'district') {
+        document.querySelectorAll('.district-pill').forEach(btn => {
+          const active = btn.getAttribute('data-val') === value;
+          btn.className = active
+            ? 'district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition'
+            : 'district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        });
+      } else if (type === 'category') {
+        document.querySelectorAll('.category-pill').forEach(btn => {
+          const active = btn.getAttribute('data-val') === value;
+          btn.className = active
+            ? 'category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-sm transition'
+            : 'category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        });
+      } else if (type === 'viral') {
+        document.querySelectorAll('.viral-pill').forEach(btn => {
+          const active = btn.getAttribute('data-val') === value;
+          btn.className = active
+            ? 'viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition'
+            : 'viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+        });
+      }
+
+      renderPlaceCards();
+    }
+
+    function toggleSelectedOnlyFilter() {
+      appState.filters.selectedOnly = !appState.filters.selectedOnly;
+      const btn = document.getElementById('btn-filter-selected');
+      if (appState.filters.selectedOnly) {
+        btn.className = 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-rose-600 bg-rose-50 text-rose-700 transition';
+      } else {
+        btn.className = 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+      }
+      renderPlaceCards();
+    }
+
+    function getFilteredPlaces() {
+      const q = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+      return appState.places.filter(place => {
+        if (appState.filters.district !== 'ALL' && place.district !== appState.filters.district) return false;
+        if (appState.filters.category !== 'ALL' && place.category !== appState.filters.category) return false;
+        if (appState.filters.viral !== 'ALL' && !place.viralTags.includes(appState.filters.viral)) return false;
+        if (appState.filters.selectedOnly && !isPlaceSelected(place.id)) return false;
+
+        if (q) {
+          const haystack = `${place.name} ${place.nameEn} ${place.district} ${place.category} ${place.signature} ${place.hashtags.join(' ')} ${place.tip}`.toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function isPlaceSelected(placeId) {
+      return appState.selectedItems.some(item => item.id === placeId);
+    }
+
+    function togglePlaceSelection(placeId) {
+      const idx = appState.selectedItems.findIndex(item => item.id === placeId);
+      const place = appState.places.find(p => p.id === placeId);
+      if (!place) return;
+
+      if (idx >= 0) {
+        appState.selectedItems.splice(idx, 1);
+        showToast(`🗑️ '${place.name}' 일정에서 제외되었습니다.`);
+      } else {
+        const assignedDay = Math.min(appState.tripDays, place.recommendedDay || 1);
+        appState.selectedItems.push({
+          id: place.id,
+          day: assignedDay,
+          time: place.recommendedTime || '12:00',
+          budgetHKD: place.priceHKD || 0,
+          memo: place.signature
+        });
+        showToast(`❤️ '${place.name}' 내 일정(Day ${assignedDay})에 담겼습니다!`);
+      }
+
+      syncAllViews();
+      saveToLocalStorage(false);
+    }
+
+    function selectAllFiltered() {
+      const filtered = getFilteredPlaces();
+      let addedCount = 0;
+      filtered.forEach(place => {
+        if (!isPlaceSelected(place.id)) {
+          appState.selectedItems.push({
+            id: place.id,
+            day: Math.min(appState.tripDays, place.recommendedDay || 1),
+            time: place.recommendedTime || '12:00',
+            budgetHKD: place.priceHKD || 0,
+            memo: place.signature
+          });
+          addedCount++;
+        }
+      });
+      syncAllViews();
+      saveToLocalStorage(false);
+      showToast(`✨ 현재 목록에서 ${addedCount}곳을 추가로 담았습니다!`);
+    }
+
+    function clearAllSelected() {
+      appState.selectedItems = [];
+      syncAllViews();
+      saveToLocalStorage(false);
+      showToast('선택한 장소 목록을 초기화했습니다.');
+    }
+
+    /**
+     * 7. PRESET COURSES & AI SMART ROUTE GROUPING
+     */
+    function applyPresetCourse(presetKey, silent = false) {
+      const presets = {
+        classic: ['hk-8', 'hk-23', 'hk-14', 'hk-13', 'hk-1', 'hk-15', 'hk-2', 'hk-10', 'hk-12', 'hk-5', 'hk-6', 'hk-22'],
+        foodie: ['hk-1', 'hk-2', 'hk-3', 'hk-4', 'hk-5', 'hk-6', 'hk-7', 'hk-8', 'hk-9', 'hk-10', 'hk-11'],
+        disney: ['hk-19', 'hk-13', 'hk-1', 'hk-15', 'hk-18', 'hk-12', 'hk-17', 'hk-16', 'hk-24', 'hk-20', 'hk-21']
+      };
+
+      const targetIds = presets[presetKey] || presets.classic;
+      appState.selectedItems = [];
+
+      targetIds.forEach(id => {
+        const place = appState.places.find(p => p.id === id);
+        if (place) {
+          appState.selectedItems.push({
+            id: place.id,
+            day: Math.min(appState.tripDays, place.recommendedDay || 1),
+            time: place.recommendedTime || '12:00',
+            budgetHKD: place.priceHKD || 0,
+            memo: place.signature
+          });
+        }
+      });
+
+      autoAssignSmartRoute(true);
+      syncAllViews();
+      saveToLocalStorage(false);
+
+      if (!silent) {
+        const names = {
+          classic: '🔥 첫 홍콩 핵심 12선 코스',
+          foodie: '🥟 미슐랭·바이럴 미식 10선 코스',
+          disney: '🏰 디즈니랜드 + 인생샷 11선 코스'
+        };
+        showToast(`${names[presetKey]}가 내 일정에 자동으로 구성되었습니다!`);
+      }
+    }
+
+    /**
+     * Smart Geographic Route Clustering:
+     * Day 1: 침사추이/구룡 (Tsim Sha Tsui & West Kowloon Harbour Night View)
+     * Day 2: 센트럴/소호 (Central, SoHo, Mid-levels & Victoria Peak)
+     * Day 3: 몽콕/야우마테이 + 코즈웨이베이/동부 (Mong Kok, Choi Hung, Monster Building)
+     * Day 4: 란타우/디즈니 (Disneyland, Ngong Ping 360)
+     */
+    function autoAssignSmartRoute(silent = false) {
+      if (appState.selectedItems.length === 0) {
+        if (!silent) showToast('먼저 1단계에서 가고 싶은 장소를 1곳 이상 담아주세요!');
+        return;
+      }
+
+      const maxDays = appState.tripDays || 4;
+      const defaultTimes = ['09:00', '10:45', '12:30', '14:30', '16:30', '18:30', '20:00', '21:15'];
+
+      appState.selectedItems.forEach(item => {
+        const place = appState.places.find(p => p.id === item.id);
+        if (!place) return;
+
+        let targetDay = 1;
+        if (place.district === '침사추이/구룡') targetDay = 1;
+        else if (place.district === '센트럴/소호') targetDay = 2;
+        else if (place.district === '몽콕/야우마테이' || place.district === '코즈웨이베이/동부') targetDay = 3;
+        else if (place.district === '란타우/디즈니') targetDay = 4;
+
+        if (targetDay > maxDays) {
+          targetDay = ((targetDay - 1) % maxDays) + 1;
+        }
+        item.day = targetDay;
+      });
+
+      // Sort each day geographically (North-South or recommended time) and assign neat time slots
+      for (let d = 1; d <= maxDays; d++) {
+        const dayItems = appState.selectedItems.filter(i => i.day === d);
+        dayItems.sort((a, b) => {
+          const pa = appState.places.find(p => p.id === a.id);
+          const pb = appState.places.find(p => p.id === b.id);
+          const ta = pa?.recommendedTime || '12:00';
+          const tb = pb?.recommendedTime || '12:00';
+          return ta.localeCompare(tb);
+        });
+
+        dayItems.forEach((item, idx) => {
+          const place = appState.places.find(p => p.id === item.id);
+          item.time = place?.recommendedTime || defaultTimes[idx % defaultTimes.length];
+        });
+      }
+
+      syncAllViews();
+      saveToLocalStorage(false);
+      if (!silent) {
+        showToast('✨ AI 동선 최적화 완료! 홍콩 지역별(침사추이/센트럴/몽콕/란타우)로 스마트하게 묶었습니다.');
+      }
+    }
+
+    /**
+     * 8. RENDER PLACE CARDS (PAGE 1)
+     */
+    function getCategoryBadgeStyle(category) {
+      if (category.includes('맛집')) return { bg: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-utensils', color: '#E11D48' };
+      if (category.includes('디저트')) return { bg: 'bg-amber-50 text-amber-800 border-amber-200', icon: 'fa-mug-hot', color: '#F59E0B' };
+      if (category.includes('랜드마크')) return { bg: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'fa-mountain-sun', color: '#2563EB' };
+      return { bg: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fa-camera-retro', color: '#9333EA' };
+    }
+
+    function getViralBadgeLabel(tag) {
+      const map = {
+        '인스타바이럴': { text: '📸 인스타·블로그 떡상', cls: 'bg-pink-100 text-pink-800' },
+        '구글평점TOP': { text: '🌟 구글 평점 우수', cls: 'bg-amber-100 text-amber-900' },
+        '미슐랭노포': { text: '🏅 미슐랭·현지 노포', cls: 'bg-rose-100 text-rose-800' },
+        '여행사필수': { text: '🎫 여행사 필수 코스', cls: 'bg-teal-100 text-teal-800' }
+      };
+      return map[tag] || { text: tag, cls: 'bg-slate-100 text-slate-700' };
+    }
+
+    function renderPlaceCards() {
+      const grid = document.getElementById('places-grid');
+      const filtered = getFilteredPlaces();
+      document.getElementById('spot-result-count').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-3xl border border-slate-200 p-12 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-800">조건에 맞는 홍콩 스팟이 없습니다</h3>
+            <p class="text-xs text-slate-500 mt-1">필터를 '전체'로 변경하거나 검색어를 지워보세요.</p>
+            <button onclick="setFilter('district','ALL'); setFilter('category','ALL'); setFilter('viral','ALL');" class="mt-4 px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">
+              모든 필터 초기화
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(place => {
+        const selected = isPlaceSelected(place.id);
+        const catStyle = getCategoryBadgeStyle(place.category);
+        const krwPrice = Math.round((place.priceHKD || 0) * appState.exchangeRate).toLocaleString();
+        const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameEn + ' Hong Kong')}`;
+
+        return `
+          <article class="bg-white rounded-2xl border ${selected ? 'border-2 border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200'} shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+            <div>
+              <!-- Card Top Header -->
+              <div class="p-4 sm:p-5 pb-3">
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border ${catStyle.bg}">
+                      <i class="fa-solid ${catStyle.icon} mr-1"></i>${place.category}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-700">
+                      📍 ${place.district}
+                    </span>
+                  </div>
+
+                  <!-- Google Rating Badge -->
+                  <div class="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg shrink-0">
+                    <i class="fa-solid fa-star text-amber-500 text-xs"></i>
+                    <span class="text-xs font-black text-slate-900">${place.rating}</span>
+                    <span class="text-[10px] text-slate-500">(${place.reviews})</span>
+                  </div>
+                </div>
+
+                <!-- Place Title -->
+                <h3 class="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                  ${place.name}
+                </h3>
+                <p class="text-xs font-medium text-slate-400">${place.nameEn}</p>
+
+                <!-- Viral Source Badges -->
+                <div class="flex flex-wrap gap-1 mt-2.5">
+                  ${place.viralTags.map(vt => {
+                    const b = getViralBadgeLabel(vt);
+                    return `<span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${b.cls}">${b.text}</span>`;
+                  }).join('')}
+                </div>
+
+                <!-- Hashtags -->
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  ${place.hashtags.map(tag => `<span class="text-[11px] font-bold text-rose-600">${tag}</span>`).join('')}
+                </div>
+              </div>
+
+              <!-- Signature Menu & Info Box -->
+              <div class="px-4 sm:px-5 py-3 bg-slate-50/80 border-y border-slate-100 space-y-1.5 text-xs">
+                <div class="flex items-start gap-2">
+                  <span class="font-extrabold text-slate-700 shrink-0">✨ 핵심 포인트:</span>
+                  <span class="font-bold text-slate-900">${place.signature}</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1">
+                  <span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${place.hours}</span>
+                  <span class="font-bold text-teal-700">
+                    ${place.priceHKD > 0 ? `약 HK$ ${place.priceHKD} (${krwPrice}원)` : '무료 관람'}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Honey Tip -->
+              <div class="p-4 sm:p-5 pt-3">
+                <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-2.5 text-xs text-slate-700 leading-relaxed">
+                  <span class="font-extrabold text-amber-800"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>실전 꿀팁:</span>
+                  ${place.tip}
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer Actions -->
+            <div class="px-4 sm:px-5 pb-4 pt-1 flex items-center gap-2">
+              <a
+                href="${gmapUrl}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shrink-0"
+                title="구글 지도에서 위치 및 최신 리뷰 보기"
+              >
+                <i class="fa-solid fa-map-location-dot text-blue-600"></i>
+                <span>구글맵</span>
+              </a>
+
+              <button
+                onclick="jumpToSpotOnMap('${place.id}')"
+                class="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shrink-0"
+                title="앱 내 인터랙티브 지도에서 보기"
+              >
+                <i class="fa-solid fa-location-crosshairs text-teal-600"></i>
+                <span>지도</span>
+              </button>
+
+              <button
+                onclick="togglePlaceSelection('${place.id}')"
+                class="flex-grow flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-extrabold transition shadow-sm ${
+                  selected
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white'
+                }"
+              >
+                <i class="fa-solid ${selected ? 'fa-check' : 'fa-plus'}"></i>
+                <span>${selected ? '일정에 담김 (해제)' : '내 일정에 담기'}</span>
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 9. INTERACTIVE LEAFLET MAP & ROUTE VISUALIZATION (PAGE 2)
+     */
+    function initLeafletMap() {
+      const container = document.getElementById('hk-leaflet-map');
+      if (!container || mapInstance) return;
+
+      // Center on Victoria Harbour between Tsim Sha Tsui and Central
+      mapInstance = L.map('hk-leaflet-map', {
+        center: [22.2905, 114.1650],
+        zoom: 13,
+        zoomControl: true
+      });
+
+      // Clean Voyager CartoDB basemap for crisp urban readability
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(mapInstance);
+
+      mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+      mapPolylineLayer = L.layerGroup().addTo(mapInstance);
+
+      renderDynamicMapButtons();
+      renderMapMarkers();
+    }
+
+    function renderDynamicMapButtons() {
+      const bar = document.getElementById('map-mode-buttons-bar');
+      if (!bar) return;
+
+      const dayButtonsHtml = Array.from({ length: appState.tripDays }, (_, i) => {
+        const d = i + 1;
+        const modeKey = `DAY${d}`;
+        const active = appState.mapMode === modeKey;
+        return `
+          <button onclick="setMapMode('${modeKey}')" id="map-mode-${modeKey}" class="map-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold ${active ? 'bg-slate-900 text-white shadow-sm' : 'text-rose-700 hover:bg-white'} transition">
+            Day ${d} 동선
+          </button>
+        `;
+      }).join('');
+
+      bar.innerHTML = `
+        <button onclick="setMapMode('ALL')" id="map-mode-ALL" class="map-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold ${appState.mapMode === 'ALL' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-700 hover:bg-white'} transition">
+          전체 명소 (${appState.places.length})
+        </button>
+        <button onclick="setMapMode('SELECTED')" id="map-mode-SELECTED" class="map-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold ${appState.mapMode === 'SELECTED' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-700 hover:bg-white'} transition">
+          내가 담은 장소만
+        </button>
+        ${dayButtonsHtml}
+      `;
+    }
+
+    function setMapMode(mode) {
+      appState.mapMode = mode;
+      renderDynamicMapButtons();
+      renderMapMarkers();
+    }
+
+    function getRecommendedTransitBetweenPlaces(p1, p2, distKm) {
+      if (distKm < 0.85) {
+        return `도보 약 ${Math.max(4, Math.round(distKm * 14))}분`;
+      }
+      const isHarbourCross =
+        (p1.district === '침사추이/구룡' && p2.district === '센트럴/소호') ||
+        (p1.district === '센트럴/소호' && p2.district === '침사추이/구룡');
+      if (isHarbourCross) {
+        return '⛴️ 스타페리(9분, HK$5~6.5) 또는 🚇 MTR(7분)';
+      }
+      if (p1.district === '센트럴/소호' && p2.district === '코즈웨이베이/동부') {
+        return '🚋 2층 트램 딩딩이(HK$3.3) 또는 🚇 MTR 아일랜드선';
+      }
+      if (p1.district === '란타우/디즈니' || p2.district === '란타우/디즈니') {
+        return '🚇 MTR 퉁구선/디즈니선 (약 25~35분)';
+      }
+      return `🚇 MTR/버스 약 ${Math.max(8, Math.round(distKm * 4.5))}분`;
+    }
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function renderMapMarkers() {
+      if (!mapInstance || !mapMarkersLayer || !mapPolylineLayer) return;
+
+      mapMarkersLayer.clearLayers();
+      mapPolylineLayer.clearLayers();
+
+      let itemsToDisplay = [];
+      const isDayMode = appState.mapMode.startsWith('DAY');
+      const dayNumber = isDayMode ? parseInt(appState.mapMode.replace('DAY', ''), 10) : null;
+
+      if (appState.mapMode === 'ALL') {
+        itemsToDisplay = appState.places.map((p, idx) => ({
+          place: p,
+          order: idx + 1,
+          selectedInfo: appState.selectedItems.find(s => s.id === p.id)
+        }));
+      } else if (appState.mapMode === 'SELECTED') {
+        itemsToDisplay = appState.selectedItems
+          .map((s, idx) => ({
+            place: appState.places.find(p => p.id === s.id),
+            order: idx + 1,
+            selectedInfo: s
+          }))
+          .filter(x => x.place);
+      } else if (isDayMode) {
+        const daySelected = appState.selectedItems
+          .filter(s => s.day === dayNumber)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        itemsToDisplay = daySelected
+          .map((s, idx) => ({
+            place: appState.places.find(p => p.id === s.id),
+            order: idx + 1,
+            selectedInfo: s
+          }))
+          .filter(x => x.place);
+      }
+
+      const latLngs = [];
+      let totalRouteKm = 0;
+
+      itemsToDisplay.forEach((entry, index) => {
+        const { place, order, selectedInfo } = entry;
+        const catStyle = getCategoryBadgeStyle(place.category);
+        const isSelected = Boolean(selectedInfo);
+
+        const pinSize = isDayMode ? 32 : 28;
+        const badgeLabel = isDayMode ? order : (isSelected ? '★' : '•');
+
+        const iconHtml = `
+          <div class="custom-pin" style="width:${pinSize}px; height:${pinSize}px; background-color:${catStyle.color}; font-size:${isDayMode ? '13px' : '12px'};">
+            ${badgeLabel}
+          </div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: '',
+          iconSize: [pinSize, pinSize],
+          iconAnchor: [pinSize / 2, pinSize / 2],
+          popupAnchor: [0, -pinSize / 2]
+        });
+
+        const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameEn + ' Hong Kong')}`;
+
+        const popupHtml = `
+          <div class="w-64 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${place.district}</span>
+              <span class="text-xs font-black text-amber-600">★ ${place.rating}</span>
+            </div>
+            <div class="font-black text-sm text-slate-900">${place.name}</div>
+            <div class="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
+              <strong class="text-slate-800">추천:</strong> ${place.signature}
+            </div>
+            <div class="flex items-center gap-1.5 pt-1">
+              <a href="${gmapUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 text-center py-1.5 px-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs">
+                구글맵 열기
+              </a>
+              <button onclick="togglePlaceSelection('${place.id}')" class="flex-1 text-center py-1.5 px-2 rounded-lg ${isSelected ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'} font-bold text-xs">
+                ${isSelected ? '담김 (해제)' : '일정에 담기'}
+              </button>
+            </div>
+          </div>
+        `;
+
+        const marker = L.marker([place.lat, place.lng], { icon: customIcon }).bindPopup(popupHtml);
+        mapMarkersLayer.addLayer(marker);
+
+        latLngs.push([place.lat, place.lng]);
+        if (index > 0) {
+          const prev = itemsToDisplay[index - 1].place;
+          totalRouteKm += calculateDistanceKm(prev.lat, prev.lng, place.lat, place.lng);
+        }
+      });
+
+      // Draw dashed route line when viewing a specific Day or Selected items
+      if ((isDayMode || appState.mapMode === 'SELECTED') && latLngs.length >= 2) {
+        const polyline = L.polyline(latLngs, {
+          color: '#E11D48',
+          weight: 4,
+          opacity: 0.85,
+          dashArray: '8, 8'
+        });
+        mapPolylineLayer.addLayer(polyline);
+      }
+
+      if (latLngs.length > 0) {
+        mapInstance.fitBounds(L.latLngBounds(latLngs), { padding: [45, 45], maxZoom: 15 });
+      }
+
+      // Render Map Sidebar List
+      renderMapSidebar(itemsToDisplay, isDayMode, dayNumber, totalRouteKm);
+    }
+
+    function renderMapSidebar(itemsToDisplay, isDayMode, dayNumber, totalRouteKm) {
+      const titleEl = document.getElementById('map-sidebar-title');
+      const summaryEl = document.getElementById('map-route-summary');
+      const listEl = document.getElementById('map-sidebar-list');
+
+      if (isDayMode) {
+        titleEl.textContent = `Day ${dayNumber} 동선 (${itemsToDisplay.length}곳)`;
+        summaryEl.textContent = itemsToDisplay.length >= 2
+          ? `총 직선 이동거리 약 ${totalRouteKm.toFixed(1)}km · 번호 순서대로 이동하세요.`
+          : '장소를 2곳 이상 배정하면 동선 연결선이 표시됩니다.';
+      } else if (appState.mapMode === 'SELECTED') {
+        titleEl.textContent = `내가 담은 장소 (${itemsToDisplay.length}곳)`;
+        summaryEl.textContent = `총 직선 거리 약 ${totalRouteKm.toFixed(1)}km`;
+      } else {
+        titleEl.textContent = `홍콩 전체 추천 스팟 (${itemsToDisplay.length}곳)`;
+        summaryEl.textContent = '장소를 클릭하면 해당 위치로 지도가 이동합니다.';
+      }
+
+      if (itemsToDisplay.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-12 px-4 text-slate-400 text-xs">
+            표시할 장소가 없습니다.<br/>1단계에서 장소를 담거나 '자동 동선 묶기' 버튼을 눌러보세요!
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = itemsToDisplay.map((entry, idx) => {
+        const { place, order, selectedInfo } = entry;
+        const nextEntry = itemsToDisplay[idx + 1];
+        let stepDistHtml = '';
+        if (nextEntry) {
+          const dist = calculateDistanceKm(place.lat, place.lng, nextEntry.place.lat, nextEntry.place.lng);
+          const transitHint = getRecommendedTransitBetweenPlaces(place, nextEntry.place, dist);
+          stepDistHtml = `
+            <div class="ml-4 pl-3 border-l-2 border-dashed border-rose-300 py-1.5 text-[11px] text-slate-600 flex items-center gap-1.5">
+              <i class="fa-solid fa-route text-rose-500"></i>
+              <span>다음 이동: 약 <strong>${dist.toFixed(1)}km</strong> · <strong class="text-teal-700">${transitHint}</strong></span>
+            </div>
+          `;
+        }
+
+        return `
+          <div>
+            <div
+              onclick="flyToRegion(${place.lat}, ${place.lng}, 16)"
+              class="p-3 rounded-xl border ${selectedInfo ? 'border-rose-200 bg-rose-50/40' : 'border-slate-200 bg-white'} hover:border-rose-400 cursor-pointer transition flex items-start justify-between gap-2"
+            >
+              <div class="flex items-start gap-2.5">
+                <span class="w-6 h-6 rounded-full ${selectedInfo ? 'bg-rose-600 text-white' : 'bg-slate-200 text-slate-700'} text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5">
+                  ${isDayMode ? order : (selectedInfo ? `D${selectedInfo.day}` : order)}
+                </span>
+                <div>
+                  <div class="text-xs font-black text-slate-900">${place.name}</div>
+                  <div class="text-[11px] text-slate-500">${place.district} · ★ ${place.rating}</div>
+                  <div class="text-[11px] font-semibold text-teal-700 mt-0.5 truncate max-w-[190px]">${place.signature}</div>
+                </div>
+              </div>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameEn + ' Hong Kong')}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="event.stopPropagation()"
+                class="text-[11px] font-bold text-blue-600 hover:underline shrink-0 px-1.5 py-1 bg-blue-50 rounded-lg"
+              >
+                구글맵
+              </a>
+            </div>
+            ${stepDistHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function flyToRegion(lat, lng, zoom = 15) {
+      if (!mapInstance) return;
+      mapInstance.flyTo([lat, lng], zoom, { duration: 0.8 });
+    }
+
+    function jumpToSpotOnMap(placeId) {
+      const place = appState.places.find(p => p.id === placeId);
+      if (!place) return;
+      switchPage(3);
+      setTimeout(() => {
+        flyToRegion(place.lat, place.lng, 16);
+      }, 250);
+    }
+
+    /**
+     * 10. SMART DAY-BY-DAY ITINERARY BUILDER (PAGE 4)
+     */
+    function renderDayFilterTabs() {
+      const tabBar = document.getElementById('day-filter-tabs');
+      if (!tabBar) return;
+
+      const dayButtons = Array.from({ length: appState.tripDays }, (_, i) => {
+        const d = i + 1;
+        const isAct = String(appState.builderDayView) === String(d);
+        return `
+          <button onclick="setBuilderDayView(${d})" id="day-tab-${d}" class="day-view-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition ${
+            isAct ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+          }">
+            Day ${d}
+          </button>
+        `;
+      }).join('');
+
+      const isAll = appState.builderDayView === 'ALL';
+      tabBar.innerHTML = `
+        <button onclick="setBuilderDayView('ALL')" id="day-tab-ALL" class="day-view-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition ${
+          isAll ? 'bg-slate-900 text-white shadow-sm' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+        }">
+          전체 일정 한눈에 (${appState.tripDurationLabel})
+        </button>
+        ${dayButtons}
+      `;
+    }
+
+    function setBuilderDayView(dayOrAll) {
+      appState.builderDayView = dayOrAll;
+      renderDayFilterTabs();
+      renderItineraryBuilder();
+    }
+
+    function getDayThemeTitle(day) {
+      const titles = {
+        1: 'Day 1 · 침사추이 & 서구룡 & 빅토리아 하버 야경 코스',
+        2: 'Day 2 · 센트럴 & 소호 미식 투어 & 빅토리아 피크트램',
+        3: 'Day 3 · 조던/몽콕 딤섬 & 초이홍·익청빌딩 인생샷 & 야시장',
+        4: 'Day 4 · 란타우 섬 (홍콩 디즈니랜드 / 옹핑 360 케이블카)'
+      };
+      return titles[day] || `Day ${day} 홍콩 자유 일정`;
+    }
+
+    function updateScheduledItem(placeId, field, value) {
+      const item = appState.selectedItems.find(i => i.id === placeId);
+      if (!item) return;
+
+      if (field === 'day') item.day = parseInt(value, 10) || 1;
+      else if (field === 'budgetHKD') item.budgetHKD = Math.max(0, parseFloat(value) || 0);
+      else item[field] = value;
+
+      syncCountersAndTotals();
+      if (field === 'day') {
+        renderItineraryBuilder();
+      }
+      saveToLocalStorage(false);
+    }
+
+    function moveScheduledItem(placeId, direction) {
+      const item = appState.selectedItems.find(i => i.id === placeId);
+      if (!item) return;
+
+      const dayItems = appState.selectedItems.filter(i => i.day === item.day);
+      const idxInDay = dayItems.findIndex(i => i.id === placeId);
+      const swapIdx = idxInDay + direction;
+
+      if (swapIdx < 0 || swapIdx >= dayItems.length) return;
+
+      // Swap time slots or positions in main array
+      const otherItem = dayItems[swapIdx];
+      const tempTime = item.time;
+      item.time = otherItem.time;
+      otherItem.time = tempTime;
+
+      const mainIdxA = appState.selectedItems.findIndex(i => i.id === item.id);
+      const mainIdxB = appState.selectedItems.findIndex(i => i.id === otherItem.id);
+      const tempObj = appState.selectedItems[mainIdxA];
+      appState.selectedItems[mainIdxA] = appState.selectedItems[mainIdxB];
+      appState.selectedItems[mainIdxB] = tempObj;
+
+      renderItineraryBuilder();
+      saveToLocalStorage(false);
+    }
+
+    function renderItineraryBuilder() {
+      const container = document.getElementById('itinerary-days-container');
+      if (!container) return;
+
+      renderDayFilterTabs();
+
+      if (appState.builderDayView !== 'ALL' && parseInt(appState.builderDayView, 10) > appState.tripDays) {
+        appState.builderDayView = 'ALL';
+      }
+
+      const daysToShow = appState.builderDayView === 'ALL'
+        ? Array.from({ length: appState.tripDays }, (_, i) => i + 1)
+        : [parseInt(appState.builderDayView, 10)];
+
+      const dayOptionsHtml = (selectedDay) =>
+        Array.from({ length: appState.tripDays }, (_, i) => {
+          const d = i + 1;
+          return `<option value="${d}" ${selectedDay === d ? 'selected' : ''}>Day ${d}</option>`;
+        }).join('');
+
+      container.innerHTML = daysToShow.map(dayNum => {
+        const dayItems = appState.selectedItems
+          .filter(i => i.day === dayNum)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+        const dayHKD = dayItems.reduce((acc, cur) => acc + (parseFloat(cur.budgetHKD) || 0), 0);
+        const dayKRW = Math.round(dayHKD * appState.exchangeRate).toLocaleString();
+
+        // Flight & Airport Transport Banner for Day 1 and Final Day
+        let flightScheduleBanner = '';
+        if (dayNum === 1) {
+          flightScheduleBanner = `
+            <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 font-bold text-indigo-950">
+                <i class="fa-solid fa-plane-arrival text-indigo-600"></i>
+                <span>첫날 항공편 도착 후 예상 시내(숙소) 도착: <strong class="text-rose-600">${appState.flight.day1CityArrivalTime}경</strong></span>
+              </div>
+              <span class="text-indigo-700 font-semibold">추천 이동: ${appState.transport.recommendedAirportMode}</span>
+            </div>
+          `;
+        } else if (dayNum === appState.tripDays) {
+          flightScheduleBanner = `
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 font-bold text-amber-950">
+                <i class="fa-solid fa-plane-departure text-amber-600"></i>
+                <span>마지막 날 공항 출발을 위한 시내 출발 권장: <strong class="text-rose-600">${appState.flight.lastDayAirportLeaveTime}경</strong></span>
+              </div>
+              <span class="text-amber-800 font-semibold">AEL 이용 시 홍콩역/구룡역 도심 얼리체크인 활용 가능!</span>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Day Header Bar -->
+            <div class="bg-slate-900 text-white px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-xs sm:text-sm">DAY ${dayNum}</span>
+                <h3 class="text-sm sm:text-base font-extrabold">${getDayThemeTitle(dayNum)}</h3>
+              </div>
+              <div class="flex items-center gap-3 text-xs">
+                <span class="text-slate-300">일정 <strong>${dayItems.length}</strong>곳</span>
+                <span class="text-slate-600">|</span>
+                <span class="font-bold text-amber-400">소계: HK$ ${dayHKD} (약 ${dayKRW}원)</span>
+                <button onclick="switchPage(3); setMapMode('DAY${dayNum}');" class="bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg font-bold text-teal-300 transition">
+                  <i class="fa-solid fa-map mr-1"></i>Day ${dayNum} 지도 동선
+                </button>
+              </div>
+            </div>
+
+            <!-- Day Items List -->
+            <div class="p-4 sm:p-6 space-y-4">
+              ${flightScheduleBanner}
+              ${dayItems.length === 0 ? `
+                <div class="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <p class="text-xs sm:text-sm font-bold text-slate-500">Day ${dayNum}에 배정된 장소가 없습니다.</p>
+                  <button onclick="switchPage(2)" class="mt-2 text-xs font-extrabold text-rose-600 hover:underline">
+                    + 2단계에서 맛집·명소 담으러 가기
+                  </button>
+                </div>
+              ` : dayItems.map((item, idx) => {
+                const place = appState.places.find(p => p.id === item.id);
+                if (!place) return '';
+                const catStyle = getCategoryBadgeStyle(place.category);
+                const itemKRW = Math.round((item.budgetHKD || 0) * appState.exchangeRate).toLocaleString();
+
+                const nextItem = dayItems[idx + 1];
+                const nextPlace = nextItem ? appState.places.find(p => p.id === nextItem.id) : null;
+                let transitConnectorHtml = '';
+                if (nextPlace) {
+                  const dist = calculateDistanceKm(place.lat, place.lng, nextPlace.lat, nextPlace.lng);
+                  const transitText = getRecommendedTransitBetweenPlaces(place, nextPlace, dist);
+                  transitConnectorHtml = `
+                    <div class="mt-2.5 pt-2 border-t border-dashed border-slate-200 text-[11px] font-bold text-teal-700 flex items-center gap-1.5">
+                      <i class="fa-solid fa-arrow-down-long text-rose-500"></i>
+                      <span>다음 장소(${nextPlace.name})까지 약 ${dist.toFixed(1)}km · 추천 이동: ${transitText}</span>
+                    </div>
+                  `;
+                }
+
+                return `
+                  <div class="bg-slate-50/70 hover:bg-slate-50 rounded-2xl p-4 border border-slate-200 transition">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                      <!-- Left: Order Badge, Time Input & Place Info -->
+                      <div class="flex items-start gap-3">
+                        <div class="w-7 h-7 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 mt-1">
+                          ${idx + 1}
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <input
+                              type="time"
+                              value="${item.time || '12:00'}"
+                              onchange="updateScheduledItem('${item.id}', 'time', this.value)"
+                              class="bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-xs font-extrabold text-rose-600 focus:outline-none focus:border-rose-500"
+                            />
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${catStyle.bg}">${place.category}</span>
+                            <span class="text-xs font-bold text-slate-500">📍 ${place.district}</span>
+                          </div>
+                          <h4 class="text-base font-black text-slate-900">${place.name}</h4>
+                          <p class="text-xs text-slate-500">💡 꿀팁: ${place.tip}</p>
+                        </div>
+                      </div>
+
+                      <!-- Right: Day Move, Order Up/Down, Budget & Delete Controls -->
+                      <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <div class="flex items-center bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
+                          <span class="text-[11px] font-bold text-slate-400 mr-1.5">예산 HK$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value="${item.budgetHKD}"
+                            oninput="updateScheduledItem('${item.id}', 'budgetHKD', this.value)"
+                            class="w-16 text-xs font-extrabold text-slate-900 focus:outline-none"
+                          />
+                          <span class="text-[10px] text-teal-700 font-bold ml-1">(${itemKRW}원)</span>
+                        </div>
+
+                        <select
+                          onchange="updateScheduledItem('${item.id}', 'day', this.value)"
+                          class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700"
+                        >
+                          ${dayOptionsHtml(item.day)}
+                        </select>
+
+                        <div class="flex items-center gap-1">
+                          <button onclick="moveScheduledItem('${item.id}', -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs flex items-center justify-center" title="위로 이동">
+                            <i class="fa-solid fa-chevron-up"></i>
+                          </button>
+                          <button onclick="moveScheduledItem('${item.id}', 1)" class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs flex items-center justify-center" title="아래로 이동">
+                            <i class="fa-solid fa-chevron-down"></i>
+                          </button>
+                          <button onclick="togglePlaceSelection('${item.id}')" class="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-600 text-xs flex items-center justify-center" title="일정에서 삭제">
+                            <i class="fa-solid fa-trash-can"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Personal Memo Input -->
+                    <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex items-center gap-2">
+                      <span class="text-[11px] font-extrabold text-slate-500 shrink-0"><i class="fa-solid fa-pen-to-square text-amber-500 mr-1"></i>주문 메뉴 / 메모:</span>
+                      <input
+                        type="text"
+                        value="${item.memo || ''}"
+                        oninput="updateScheduledItem('${item.id}', 'memo', this.value)"
+                        placeholder="꼭 먹을 메뉴나 예약 시간, 준비물을 적어두세요"
+                        class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
+                    ${transitConnectorHtml}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 11. FINAL PERSONAL TRAVEL BOOK & CHECKLIST (PAGE 5)
+     */
+    function renderFinalTravelBook() {
+      document.getElementById('book-traveler-name').textContent = appState.travelerName;
+      document.getElementById('book-trip-subtitle').textContent =
+        `${appState.tripDurationLabel} (${appState.flight.startDate} ~ ${appState.flight.endDate}) · ${appState.tripVibe} · 총 ${appState.selectedItems.length}개 스팟`;
+      document.getElementById('book-rate-label').textContent = appState.exchangeRate;
+
+      const spotsHKD = appState.selectedItems.reduce((sum, i) => sum + (parseFloat(i.budgetHKD) || 0), 0);
+      const transportHKD = appState.transport.totalTransportHKDPerPerson || 0;
+      const grandTotalHKD = spotsHKD + transportHKD;
+      const grandTotalKRW = Math.round(grandTotalHKD * appState.exchangeRate).toLocaleString();
+
+      document.getElementById('book-total-hkd').textContent = grandTotalHKD.toLocaleString();
+      document.getElementById('book-total-krw').textContent = grandTotalKRW;
+
+      const flightSummaryEl = document.getElementById('book-flight-transport-summary');
+      if (flightSummaryEl) {
+        flightSummaryEl.innerHTML = `
+          <span>✈️ 첫날 시내도착 <strong>${appState.flight.day1CityArrivalTime}</strong> / 마지막날 시내출발 <strong>${appState.flight.lastDayAirportLeaveTime}</strong></span>
+          <span>|</span>
+          <span>🚌 공항이동: <strong>${appState.transport.recommendedAirportMode}</strong> (1인 총 교통비 HK$ ${transportHKD} 포함)</span>
+        `;
+      }
+
+      const timelineEl = document.getElementById('book-timeline-content');
+      const daysArr = Array.from({ length: appState.tripDays }, (_, i) => i + 1);
+
+      timelineEl.innerHTML = daysArr.map(dayNum => {
+        const dayItems = appState.selectedItems
+          .filter(i => i.day === dayNum)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+        if (dayItems.length === 0) {
+          return `
+            <div class="print-break-inside border border-slate-200 rounded-2xl overflow-hidden">
+              <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
+                <span class="font-black text-sm">${getDayThemeTitle(dayNum)}</span>
+                <span class="text-xs text-slate-400 font-bold">자유 일정</span>
+              </div>
+              <div class="p-4 text-xs text-slate-500 bg-white">배정된 장소가 없습니다. 자유롭게 홍콩 거리를 산책하거나 휴식을 취해보세요.</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="print-break-inside border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between">
+              <span class="font-black text-sm">${getDayThemeTitle(dayNum)}</span>
+              <span class="text-xs text-amber-300 font-bold">${dayItems.length}개 코스</span>
+            </div>
+            <div class="divide-y divide-slate-100">
+              ${dayItems.map((item, idx) => {
+                const place = appState.places.find(p => p.id === item.id);
+                if (!place) return '';
+                return `
+                  <div class="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white">
+                    <div class="flex items-start gap-3">
+                      <span class="px-2 py-1 rounded-lg bg-rose-50 text-rose-700 font-black text-xs shrink-0">
+                        ${item.time || '12:00'}
+                      </span>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="font-black text-sm text-slate-900">${idx + 1}. ${place.name}</span>
+                          <span class="text-[11px] font-semibold text-slate-500">(${place.district} · ★${place.rating})</span>
+                        </div>
+                        <div class="text-xs font-bold text-teal-700 mt-0.5">📌 메모/메뉴: ${item.memo || place.signature}</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">💡 ${place.tip}</div>
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <span class="text-xs font-extrabold text-slate-800">
+                        ${item.budgetHKD > 0 ? `HK$ ${item.budgetHKD}` : '무료'}
+                      </span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Checklist
+      const chkContainer = document.getElementById('checklist-container');
+      chkContainer.innerHTML = appState.checklist.map(chk => `
+        <label class="flex items-start gap-3 p-3.5 rounded-2xl border ${chk.done ? 'bg-teal-50/50 border-teal-200' : 'bg-white border-slate-200'} cursor-pointer transition">
+          <input
+            type="checkbox"
+            ${chk.done ? 'checked' : ''}
+            onchange="toggleChecklist('${chk.id}')"
+            class="mt-1 w-4 h-4 accent-teal-600 rounded cursor-pointer"
+          />
+          <div>
+            <div class="text-xs sm:text-sm font-extrabold ${chk.done ? 'line-through text-slate-400' : 'text-slate-900'}">${chk.title}</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">${chk.desc}</div>
+          </div>
+        </label>
+      `).join('');
+    }
+
+    function toggleChecklist(chkId) {
+      const target = appState.checklist.find(c => c.id === chkId);
+      if (target) {
+        target.done = !target.done;
+        renderFinalTravelBook();
+        saveToLocalStorage(false);
+      }
+    }
+
+    /**
+     * 12. CUSTOM PLACE MODAL & PHRASE MODAL & COPY SHARE
+     */
+    function openCustomSpotModal() {
+      document.getElementById('custom-spot-modal').classList.remove('hidden');
+    }
+
+    function closeCustomSpotModal() {
+      document.getElementById('custom-spot-modal').classList.add('hidden');
+    }
+
+    function handleAddCustomSpot(e) {
+      e.preventDefault();
+      const name = document.getElementById('custom-name').value.trim();
+      const district = document.getElementById('custom-district').value;
+      const category = document.getElementById('custom-category').value;
+      const priceHKD = parseFloat(document.getElementById('custom-price').value) || 0;
+      const day = parseInt(document.getElementById('custom-day').value, 10) || 1;
+      const tip = document.getElementById('custom-tip').value.trim() || '나만의 홍콩 커스텀 스팟';
+
+      if (!name) return;
+
+      const districtCenterCoords = {
+        '센트럴/소호': [22.2825, 114.1545],
+        '침사추이/구룡': [22.2960, 114.1715],
+        '몽콕/야우마테이': [22.3155, 114.1702],
+        '코즈웨이베이/동부': [22.2805, 114.1850],
+        '란타우/디즈니': [22.2950, 113.9900]
+      };
+      const baseCoord = districtCenterCoords[district] || [22.2880, 114.1650];
+
+      const newId = 'custom-' + Date.now();
+      const newPlace = {
+        id: newId,
+        name,
+        nameEn: name,
+        district,
+        category,
+        rating: 4.9,
+        reviews: '내 픽',
+        viralTags: ['인스타바이럴', '구글평점TOP'],
+        hashtags: ['#나만의장소', '#커스텀스팟'],
+        signature: tip,
+        priceHKD,
+        hours: '상시 확인',
+        tip,
+        lat: baseCoord[0] + (Math.random() - 0.5) * 0.004,
+        lng: baseCoord[1] + (Math.random() - 0.5) * 0.004,
+        recommendedDay: day,
+        recommendedTime: '14:00'
+      };
+
+      appState.places.unshift(newPlace);
+      appState.selectedItems.push({
+        id: newId,
+        day,
+        time: '14:00',
+        budgetHKD: priceHKD,
+        memo: tip
+      });
+
+      closeCustomSpotModal();
+      document.getElementById('custom-name').value = '';
+      document.getElementById('custom-tip').value = '';
+
+      syncAllViews();
+      saveToLocalStorage(false);
+      showToast(`✨ '${name}' 장소가 추가되고 Day ${day} 일정에 담겼습니다!`);
+    }
+
+    function showPhraseModal(hanzi, pron, meaning) {
+      document.getElementById('modal-phrase-hanzi').textContent = hanzi;
+      document.getElementById('modal-phrase-pron').textContent = `발음: ${pron}`;
+      document.getElementById('modal-phrase-meaning').textContent = meaning;
+      document.getElementById('phrase-modal').classList.remove('hidden');
+    }
+
+    function closePhraseModal() {
+      document.getElementById('phrase-modal').classList.add('hidden');
+    }
+
+    function copyItineraryText() {
+      const spotsHKD = appState.selectedItems.reduce((s, i) => s + (parseFloat(i.budgetHKD) || 0), 0);
+      const transportHKD = appState.transport.totalTransportHKDPerPerson || 0;
+      const totalHKD = spotsHKD + transportHKD;
+      const totalKRW = Math.round(totalHKD * appState.exchangeRate).toLocaleString();
+
+      let lines = [];
+      lines.push(`🇭🇰 [${appState.travelerName}님을 위한 홍콩 여행 계획서]`);
+      lines.push(`• 일정: ${appState.tripDurationLabel} (${appState.flight.startDate} ~ ${appState.flight.endDate})`);
+      lines.push(`• 비행/이동: 첫날 시내도착 ${appState.flight.day1CityArrivalTime}경 / 마지막날 공항출발 ${appState.flight.lastDayAirportLeaveTime}경`);
+      lines.push(`• 추천 공항교통: ${appState.transport.recommendedAirportMode}`);
+      lines.push(`• 1인 총 예상 경비: HK$ ${totalHKD} (식비·입장료 HK$${spotsHKD} + 교통비 HK$${transportHKD} / 약 ${totalKRW}원)\n`);
+
+      for (let d = 1; d <= appState.tripDays; d++) {
+        const items = appState.selectedItems
+          .filter(i => i.day === d)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        lines.push(`■ ${getDayThemeTitle(d)}`);
+        if (items.length === 0) {
+          lines.push(`  - 자유 일정`);
+        } else {
+          items.forEach((item, idx) => {
+            const p = appState.places.find(pl => pl.id === item.id);
+            if (p) {
+              lines.push(`  ${idx + 1}. [${item.time}] ${p.name} (${p.district}) - ${item.memo || p.signature} / HK$${item.budgetHKD}`);
+            }
+          });
+        }
+        lines.push('');
+      }
+
+      const textToCopy = lines.join('\n');
+      const tempArea = document.createElement('textarea');
+      tempArea.value = textToCopy;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('📋 카카오톡/메모장 공유용 홍콩 여행 계획서가 클립보드에 복사되었습니다!');
+      } catch (err) {
+        showToast('복사 중 오류가 발생했습니다.');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    /**
+     * 13. GLOBAL VIEW SYNCHRONIZATION & TOAST HELPER
+     */
+    function syncCountersAndTotals() {
+      const count = appState.selectedItems.length;
+      const spotsHKD = appState.selectedItems.reduce((sum, i) => sum + (parseFloat(i.budgetHKD) || 0), 0);
+      const transportHKD = appState.transport.totalTransportHKDPerPerson || 0;
+      const totalHKD = spotsHKD + transportHKD;
+      const totalKRW = Math.round(totalHKD * appState.exchangeRate).toLocaleString();
+
+      document.getElementById('hero-traveler-name').textContent = appState.travelerName;
+      document.getElementById('header-traveler-badge').textContent = `${appState.travelerName} 전용`;
+
+      const durBadge = document.getElementById('header-duration-badge');
+      if (durBadge) durBadge.textContent = appState.tripDurationLabel;
+      const expDur = document.getElementById('explorer-duration-label');
+      if (expDur) expDur.textContent = appState.tripDurationLabel;
+
+      document.getElementById('nav-selected-count').textContent = count;
+      document.getElementById('mobile-selected-count').textContent = count;
+      document.getElementById('filter-selected-badge').textContent = count;
+      document.getElementById('footer-selected-count').textContent = `${count}곳 (${appState.tripDurationLabel})`;
+      document.getElementById('footer-budget-summary').textContent = `HK$ ${totalHKD.toLocaleString()} (약 ${totalKRW}원)`;
+
+      const bSpots = document.getElementById('builder-total-spots');
+      if (bSpots) {
+        bSpots.textContent = count;
+        const bDaysTag = document.getElementById('builder-days-tag');
+        if (bDaysTag) bDaysTag.textContent = `(${appState.tripDurationLabel})`;
+        document.getElementById('builder-total-hkd').textContent = spotsHKD.toLocaleString();
+        const bTrans = document.getElementById('builder-transport-hkd');
+        if (bTrans) bTrans.textContent = transportHKD.toLocaleString();
+        document.getElementById('builder-total-krw').textContent = totalKRW;
+      }
+    }
+
+    function syncAllViews() {
+      syncCountersAndTotals();
+      renderPlaceCards();
+      renderDynamicMapButtons();
+      if (mapInstance) renderMapMarkers();
+      renderItineraryBuilder();
+      renderFinalTravelBook();
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-900/95 text-white px-4 py-3 rounded-2xl shadow-xl border border-white/15 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all duration-300';
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2600);
+    }
+  </script>
+</body>
+</html>
