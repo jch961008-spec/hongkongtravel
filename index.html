@@ -2,7 +2,11 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="홍콩 플래너" />
+  <meta name="theme-color" content="#0F172A" />
   <title>나만을 위한 홍콩 여행 올인원 가이드 & 플래너</title>
 
   <!-- Tailwind CSS CDN -->
@@ -16,9 +20,9 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- Leaflet.js CSS & JS for Interactive Hong Kong Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet.js CSS & JS via Cloudflare CDN (No API Key Required) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -46,6 +50,28 @@
       background-color: #F8FAFC;
       color: #0F172A;
       overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* iOS Safari Safe Area & Input Zoom Prevention */
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .safe-bottom {
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     /* Custom Scrollbar */
@@ -137,57 +163,57 @@
   <!-- ================================================================= -->
   <!-- TOP STICKY HEADER & STEP NAVIGATION BAR                           -->
   <!-- ================================================================= -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm no-print safe-top">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-2.5 sm:py-3 gap-2.5">
         <!-- Brand Logo & Personal Title -->
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3 cursor-pointer" onclick="switchPage(1)">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
-              <i class="fa-solid fa-train-tram text-lg"></i>
+          <div class="flex items-center gap-2.5 sm:gap-3 cursor-pointer" onclick="switchPage(1)">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0">
+              <i class="fa-solid fa-train-tram text-base sm:text-lg"></i>
             </div>
             <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">HONG KONG CURATION</span>
-                <span id="header-traveler-badge" class="text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">VIP 1인 맞춤</span>
-                <span id="header-duration-badge" class="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">3박 4일</span>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">HK CURATION</span>
+                <span id="header-traveler-badge" class="text-[10px] sm:text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">VIP 1인 맞춤</span>
+                <span id="header-duration-badge" class="text-[10px] sm:text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">3박 4일</span>
               </div>
-              <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+              <h1 class="text-sm sm:text-lg font-extrabold text-slate-900 tracking-tight mt-0.5">
                 나만을 위한 홍콩 여행 가이드 & 플래너
               </h1>
             </div>
           </div>
 
           <!-- Mobile Basket Badge -->
-          <button onclick="switchPage(4)" class="md:hidden flex items-center gap-1.5 bg-slate-900 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow">
+          <button onclick="switchPage(4)" class="md:hidden flex items-center gap-1.5 bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold shadow shrink-0">
             <i class="fa-solid fa-bookmark text-amber-400"></i>
-            <span>담은 장소</span>
+            <span>담은곳</span>
             <span id="mobile-selected-count" class="bg-rose-600 text-white px-1.5 py-0.2 rounded-full">0</span>
           </button>
         </div>
 
-        <!-- 5-Step Split Page Navigation Tabs -->
-        <nav class="grid grid-cols-5 gap-1 sm:gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-          <button id="step-btn-1" onclick="switchPage(1)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all bg-rose-600 text-white shadow-sm">
+        <!-- 5-Step Split Page Navigation Tabs (Swipeable on small iPhone screens) -->
+        <nav class="flex md:grid md:grid-cols-5 gap-1 sm:gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 overflow-x-auto no-scrollbar">
+          <button id="step-btn-1" onclick="switchPage(1)" class="step-tab shrink-0 flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all bg-rose-600 text-white shadow-sm">
             <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0">1</span>
-            <span class="truncate">항공·교통비교</span>
+            <span class="whitespace-nowrap">항공·숙소·교통</span>
           </button>
-          <button id="step-btn-2" onclick="switchPage(2)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="step-btn-2" onclick="switchPage(2)" class="step-tab shrink-0 flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">2</span>
-            <span class="truncate">맛집·핫플탐색</span>
+            <span class="whitespace-nowrap">맛집·숙소탐색</span>
           </button>
-          <button id="step-btn-3" onclick="switchPage(3)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="step-btn-3" onclick="switchPage(3)" class="step-tab shrink-0 flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">3</span>
-            <span class="truncate">홍콩여행지도</span>
+            <span class="whitespace-nowrap">구글·애플지도</span>
           </button>
-          <button id="step-btn-4" onclick="switchPage(4)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="step-btn-4" onclick="switchPage(4)" class="step-tab shrink-0 flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">4</span>
-            <span class="truncate">일정계획서</span>
+            <span class="whitespace-nowrap">일정계획서</span>
             <span id="nav-selected-count" class="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-rose-100 text-rose-700">0</span>
           </button>
-          <button id="step-btn-5" onclick="switchPage(5)" class="step-tab flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <button id="step-btn-5" onclick="switchPage(5)" class="step-tab shrink-0 flex-1 flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-slate-900 hover:bg-white/60">
             <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">5</span>
-            <span class="truncate">트래블북·체크</span>
+            <span class="whitespace-nowrap">트래블북</span>
           </button>
         </nav>
       </div>
@@ -270,9 +296,12 @@
           <!-- Date & Flight Time Inputs -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
             <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-              <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛫 한국 출발일 (출국)</label>
-              <input id="calc-start-date" type="date" value="2025-05-01" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
-              <p class="text-[11px] text-slate-500 mt-1.5">인천/김해 등 출발 날짜 선택</p>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-extrabold text-slate-700">🛫 한국 출발일 (출국)</label>
+                <button onclick="setQuickTodayDates()" class="text-[10px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md border border-rose-200 transition">오늘+7일로 맞춤</button>
+              </div>
+              <input id="calc-start-date" type="date" value="2026-11-20" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
+              <p class="text-[11px] text-slate-500 mt-1.5">2026년 최신 일정 기준 자동 반영</p>
             </div>
 
             <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
@@ -289,7 +318,7 @@
 
             <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
               <label class="block text-xs font-extrabold text-slate-700 mb-1.5">🛬 홍콩 출발일 (귀국)</label>
-              <input id="calc-end-date" type="date" value="2025-05-04" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
+              <input id="calc-end-date" type="date" value="2026-11-23" onchange="calculateFlightAndDuration()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500" />
               <p class="text-[11px] text-slate-500 mt-1.5">홍콩국제공항 출발 날짜 선택</p>
             </div>
 
@@ -353,9 +382,22 @@
           </div>
 
           <!-- Interactive Simulator Controls -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 my-5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div class="sm:col-span-2 lg:col-span-1">
+              <label class="block text-xs font-extrabold text-rose-600 mb-1">🏨 주요 인기 숙소 빠른 선택 (YMCA 등)</label>
+              <select id="sim-hotel-preset" onchange="handleHotelPresetChange()" class="w-full bg-white border-2 border-rose-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-rose-500">
+                <option value="hk-25|침사추이/구룡" selected>★ 솔즈베리 YMCA 홍콩 (침사추이)</option>
+                <option value="hk-26|침사추이/구룡">아이콘 호텔 Hotel ICON (침사추이 동부)</option>
+                <option value="hk-27|침사추이/구룡">더 로얄 퍼시픽 호텔 (하버시티 옆)</option>
+                <option value="hk-28|센트럴/소호">이비스 홍콩 센트럴 & 셩완 (가성비 1위)</option>
+                <option value="hk-29|센트럴/소호">더 피고 호텔 The Figo (소호 감성)</option>
+                <option value="hk-30|몽콕/야우마테이">코디스 홍콩 몽콕 (랑함플레이스 직결)</option>
+                <option value="custom|침사추이/구룡">직접 권역만 선택하기</option>
+              </select>
+            </div>
+
             <div>
-              <label class="block text-xs font-extrabold text-slate-700 mb-1">🏨 내 숙소 위치 권역</label>
+              <label class="block text-xs font-extrabold text-slate-700 mb-1">📍 내 숙소 위치 권역</label>
               <select id="sim-hotel-area" onchange="renderAirportTransportComparison()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-900">
                 <option value="침사추이/구룡" selected>침사추이 · 조던 · 서구룡</option>
                 <option value="센트럴/소호">센트럴 · 소호 · 셩완</option>
@@ -570,218 +612,322 @@
     </section>
 
     <!-- =============================================================== -->
-    <!-- PAGE 2: 홍콩 핫플/맛집 탐색 & 담기 (EXPLORER)                     -->
+    <!-- PAGE 2: 홍콩 핫플/맛집 탐색 & 담기 (CLEAN & EXPANDED EXPLORER)    -->
     <!-- =============================================================== -->
     <section id="page-2" class="page-section">
-      <!-- Hero Banner & Preset Quick Course Buttons -->
-      <div class="hk-hero-bg text-white py-7 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div class="max-w-7xl mx-auto relative z-10">
-          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div>
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-amber-300 mb-2">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <span>STEP 2 · 구글 지도 평점 · 인스타그램 바이럴 · 미슐랭 · 네이버 블로그 빅데이터 엄선</span>
-              </div>
-              <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-                오직 <span id="hero-traveler-name" class="text-amber-400 underline decoration-rose-500 decoration-wavy underline-offset-4">나</span>만을 위한 홍콩 맛집·명소 24선
-              </h2>
-              <p class="mt-1.5 text-slate-300 text-xs sm:text-sm max-w-2xl">
-                1단계에서 설정한 <strong id="explorer-duration-label" class="text-amber-300">3박 4일</strong> 일정에 맞춰 가고 싶은 곳을 골라 담으세요.
-              </p>
+      <!-- Compact Hero Banner & Preset Quick Course Buttons -->
+      <div class="hk-hero-bg text-white py-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[11px] font-bold text-amber-300 mb-1.5">
+              <i class="fa-solid fa-compass"></i>
+              <span>STEP 2 · 엄선된 홍콩 맛집·명소·숙소 42선 큐레이션</span>
             </div>
+            <h2 class="text-xl sm:text-2xl font-black tracking-tight">
+              <span id="hero-traveler-name" class="text-amber-400">나</span>만을 위한 홍콩 핫플 탐색 (<span id="explorer-duration-label" class="text-teal-300">3박 4일</span>)
+            </h2>
+          </div>
 
-            <!-- Preset Quick Course Buttons -->
-            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3.5 sm:p-4 flex flex-col gap-2 min-w-[280px]">
-              <div class="text-xs font-bold text-amber-300 flex items-center justify-between">
-                <span><i class="fa-solid fa-bolt mr-1"></i>원클릭 추천 패키지 담기</span>
-                <span class="text-[11px] text-slate-300 font-normal">초보자 추천!</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5">
-                <button onclick="applyPresetCourse('classic')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
-                  🔥 첫 홍콩 핵심 12선
-                </button>
-                <button onclick="applyPresetCourse('foodie')" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
-                  🥟 미슐랭·바이럴 미식 10선
-                </button>
-                <button onclick="applyPresetCourse('disney')" class="text-xs bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl transition shadow-sm">
-                  🏰 디즈니+인생샷 11선
-                </button>
-              </div>
-            </div>
+          <!-- Clean Preset Quick Course Bar -->
+          <div class="flex flex-wrap items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-2.5">
+            <span class="text-xs font-extrabold text-amber-300 px-2"><i class="fa-solid fa-bolt mr-1"></i>추천 프리셋:</span>
+            <button onclick="applyPresetCourse('classic')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+              🔥 첫 홍콩 핵심 13선
+            </button>
+            <button onclick="applyPresetCourse('foodie')" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl transition">
+              🥟 미슐랭·노포 14선
+            </button>
+            <button onclick="applyPresetCourse('viral')" class="text-xs bg-pink-600 hover:bg-pink-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+              📸 인스타 바이럴 12선
+            </button>
+            <button onclick="applyPresetCourse('disney')" class="text-xs bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-1.5 rounded-xl transition">
+              🏰 디즈니·가족 12선
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Filter & Search Controls -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
-          <!-- Top Row: Search Bar + Action Toggles -->
-          <div class="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
-            <div class="relative flex-grow">
-              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <!-- Streamlined Filter & Search Controls -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+
+        <!-- UNIFIED CLEAN CONTROL CARD -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+          
+          <!-- Row 1: Category Tabs (Single Clean Horizontal Scrollable Bar) + Reset Buttons -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div id="category-filter-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
+              <button onclick="setFilter('category', 'ALL')" data-val="ALL" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white shadow-sm transition">✨ 전체 (42)</button>
+              <button onclick="setFilter('category', '인기 숙소 & 호텔')" data-val="인기 숙소 & 호텔" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🏨 인기 숙소·호텔</button>
+              <button onclick="setFilter('category', '미슐랭 & 노포 맛집')" data-val="미슐랭 & 노포 맛집" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🍜 미슐랭·노포 맛집</button>
+              <button onclick="setFilter('category', '인스타 바이럴 디저트/카페')" data-val="인스타 바이럴 디저트/카페" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🥧 바이럴 디저트·카페</button>
+              <button onclick="setFilter('category', '필수 랜드마크/야경')" data-val="필수 랜드마크/야경" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">🌃 랜드마크·야경</button>
+              <button onclick="setFilter('category', '포토스팟 & 쇼핑')" data-val="포토스팟 & 쇼핑" class="category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">📸 포토스팟·쇼핑</button>
+            </div>
+
+            <!-- Prominent Reset & Custom Spot Buttons -->
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                onclick="resetExplorerFilters()"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
+                title="검색어와 모든 필터를 초기 상태로 되돌립니다"
+              >
+                <i class="fa-solid fa-rotate-left text-rose-600"></i>
+                <span>필터 초기화</span>
+              </button>
+              <button
+                onclick="clearAllSelected()"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition"
+                title="담아둔 일정을 모두 비웁니다"
+              >
+                <i class="fa-regular fa-trash-can"></i>
+                <span>담은곳 비우기</span>
+              </button>
+              <button
+                onclick="openCustomSpotModal()"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-slate-800 text-white transition"
+              >
+                <i class="fa-solid fa-plus text-amber-400"></i>
+                <span>직접 추가</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Row 2: Rich Exploration Options (Search Input + District + Curation Source + Budget + Sort Selectors) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5">
+            <!-- Instant Keyword Search -->
+            <div class="sm:col-span-2 lg:col-span-4 relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
               <input
                 id="search-input"
                 type="text"
                 oninput="renderPlaceCards()"
-                placeholder="장소명, 메뉴(에그타르트, 완탕면, 구스, 야경), 지역 검색..."
-                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
+                placeholder="장소·메뉴 검색 (예: YMCA, 에그타르트, 딤섬, 해시태그B)..."
+                class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:bg-white focus:outline-none focus:border-rose-500"
               />
+              <button onclick="document.getElementById('search-input').value=''; renderPlaceCards();" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                <i class="fa-solid fa-circle-xmark"></i>
+              </button>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
+
+            <!-- District Dropdown -->
+            <div class="lg:col-span-2">
+              <select id="select-filter-district" onchange="setFilter('district', this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-rose-500">
+                <option value="ALL">📍 지역: 홍콩 전체</option>
+                <option value="침사추이/구룡">📍 침사추이·서구룡</option>
+                <option value="센트럴/소호">📍 센트럴·소호·셩완</option>
+                <option value="몽콕/야우마테이">📍 몽콕·조던·초이홍</option>
+                <option value="코즈웨이베이/동부">📍 완차이·코즈웨이·익청</option>
+                <option value="란타우/디즈니">📍 란타우·디즈니·남부</option>
+              </select>
+            </div>
+
+            <!-- Viral / Reputation Source Dropdown -->
+            <div class="lg:col-span-2">
+              <select id="select-filter-viral" onchange="setFilter('viral', this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-rose-500">
+                <option value="ALL">🔥 출처: 전체 테마</option>
+                <option value="구글평점TOP">🌟 구글 평점 4.4+ 인증</option>
+                <option value="인스타바이럴">📸 인스타·블로그 떡상</option>
+                <option value="미슐랭노포">🏅 미슐랭·백종원·노포</option>
+                <option value="여행사필수">🎫 여행사 필수 클래식</option>
+              </select>
+            </div>
+
+            <!-- Price / Budget Tier Dropdown -->
+            <div class="lg:col-span-2">
+              <select id="select-filter-price" onchange="setFilter('priceTier', this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-rose-500">
+                <option value="ALL">💰 예산: 전체 가격대</option>
+                <option value="FREE">🆓 무료 명소·포토존</option>
+                <option value="BUDGET">💵 가성비 (~HK$ 80)</option>
+                <option value="MID">💳 보통 (HK$ 81~300)</option>
+                <option value="LUXURY">💎 럭셔리/숙소/티켓 (300+)</option>
+              </select>
+            </div>
+
+            <!-- Sort Order Dropdown -->
+            <div class="lg:col-span-2">
+              <select id="select-sort-by" onchange="setFilter('sortBy', this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-rose-500">
+                <option value="RECOMMENDED">✨ 추천 큐레이션순</option>
+                <option value="RATING_DESC">⭐ 구글 별점 높은순</option>
+                <option value="PRICE_ASC">💰 가격 낮은순 (무료우선)</option>
+                <option value="PRICE_DESC">💎 가격 높은순 (숙소/테마)</option>
+                <option value="DAY_ASC">📅 추천 방문일자순</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: Compact Google/Apple Maps External Search & Selected Toggle Bar -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pt-2 border-t border-slate-100">
+            <!-- External Google/Apple Search Mini Bar -->
+            <div class="flex items-center gap-1.5 flex-grow max-w-xl">
+              <span class="text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-200 shrink-0">
+                <i class="fa-brands fa-google mr-1"></i>외부 지도 검색
+              </span>
+              <input
+                id="google-live-search-input"
+                type="text"
+                onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeGoogleMapSearch('google'); }"
+                placeholder="목록에 없는 호텔·식당 구글/애플지도 검색..."
+                class="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+              />
+              <button onclick="executeGoogleMapSearch('google')" class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shrink-0">구글맵</button>
+              <button onclick="executeGoogleMapSearch('apple')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shrink-0"><i class="fa-brands fa-apple"></i></button>
+              <button onclick="quickAddSearchedPlace()" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold shrink-0">+담기</button>
+            </div>
+
+            <!-- Result Count & Selected Only Toggle -->
+            <div class="flex items-center justify-between md:justify-end gap-2">
+              <span class="text-xs font-bold text-slate-600">
+                검색 결과 <strong id="spot-result-count" class="text-rose-600 font-black">42</strong>곳
+              </span>
               <button
                 id="btn-filter-selected"
                 onclick="toggleSelectedOnlyFilter()"
-                class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
               >
-                <i class="fa-solid fa-check-double text-rose-600"></i>
-                <span>내가 담은 곳만 보기</span>
-                <span id="filter-selected-badge" class="px-1.5 py-0.5 text-xs rounded-full bg-rose-100 text-rose-700 font-extrabold">0</span>
+                <i class="fa-solid fa-bookmark text-rose-600"></i>
+                <span>담은 곳만 보기</span>
+                <span id="filter-selected-badge" class="px-1.5 py-0.2 text-[10px] rounded-full bg-rose-100 text-rose-700 font-black">0</span>
               </button>
-
-              <button
-                onclick="openCustomSpotModal()"
-                class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white transition shadow-sm"
-              >
-                <i class="fa-solid fa-plus text-amber-400"></i>
-                <span>나만의 장소 추가</span>
-              </button>
+              <button onclick="selectAllFiltered()" class="text-xs font-bold text-teal-700 hover:underline px-2 py-1">현재 목록 전체 담기</button>
             </div>
           </div>
 
-          <!-- District Filter Pills -->
-          <div>
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-location-dot text-rose-500"></i>
-              <span>홍콩 지역별 필터 (District)</span>
-            </div>
-            <div id="district-filter-bar" class="flex flex-wrap gap-1.5">
-              <button onclick="setFilter('district', 'ALL')" data-val="ALL" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition">전체 지역</button>
-              <button onclick="setFilter('district', '센트럴/소호')" data-val="센트럴/소호" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">센트럴·소호·셩완</button>
-              <button onclick="setFilter('district', '침사추이/구룡')" data-val="침사추이/구룡" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">침사추이·서구룡</button>
-              <button onclick="setFilter('district', '몽콕/야우마테이')" data-val="몽콕/야우마테이" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">몽콕·조던·초이홍</button>
-              <button onclick="setFilter('district', '코즈웨이베이/동부')" data-val="코즈웨이베이/동부" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">완차이·코즈웨이·익청빌딩</button>
-              <button onclick="setFilter('district', '란타우/디즈니')" data-val="란타우/디즈니" class="district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">란타우·디즈니·옹핑</button>
-            </div>
-          </div>
-
-          <!-- Category & Viral Source Filter Row -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-            <!-- Category Filter -->
-            <div>
-              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <i class="fa-solid fa-utensils text-amber-500"></i>
-                <span>카테고리별 (Category)</span>
-              </div>
-              <div id="category-filter-bar" class="flex flex-wrap gap-1.5">
-                <button onclick="setFilter('category', 'ALL')" data-val="ALL" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-sm transition">전체</button>
-                <button onclick="setFilter('category', '미슐랭 & 노포 맛집')" data-val="미슐랭 & 노포 맛집" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🍜 미슐랭 & 노포 맛집</button>
-                <button onclick="setFilter('category', '인스타 바이럴 디저트/카페')" data-val="인스타 바이럴 디저트/카페" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🥧 바이럴 디저트·카페</button>
-                <button onclick="setFilter('category', '필수 랜드마크/야경')" data-val="필수 랜드마크/야경" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌃 필수 랜드마크·야경</button>
-                <button onclick="setFilter('category', '포토스팟 & 쇼핑')" data-val="포토스팟 & 쇼핑" class="category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">📸 포토스팟·쇼핑</button>
-              </div>
-            </div>
-
-            <!-- Viral / Reputation Source Filter -->
-            <div>
-              <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <i class="fa-solid fa-fire text-rose-500"></i>
-                <span>평판·바이럴 출처 필터 (Curation Source)</span>
-              </div>
-              <div id="viral-filter-bar" class="flex flex-wrap gap-1.5">
-                <button onclick="setFilter('viral', 'ALL')" data-val="ALL" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition">전체 출처</button>
-                <button onclick="setFilter('viral', '구글평점TOP')" data-val="구글평점TOP" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌟 구글 평점 4.4+</button>
-                <button onclick="setFilter('viral', '인스타바이럴')" data-val="인스타바이럴" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">📸 인스타·블로그 떡상</button>
-                <button onclick="setFilter('viral', '미슐랭노포')" data-val="미슐랭노포" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🏅 미슐랭·백종원·현지인 노포</button>
-                <button onclick="setFilter('viral', '여행사필수')" data-val="여행사필수" class="viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🎫 여행사 필수 코스</button>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <!-- Status Bar above Cards -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 my-4 px-1">
-          <div class="text-sm font-bold text-slate-700">
-            검색된 홍콩 스팟 <span id="spot-result-count" class="text-rose-600 font-extrabold">24</span>곳
-            <span class="text-xs font-normal text-slate-500 ml-2">원하는 장소를 담고 다음 단계(지도/일정표)로 이동하세요.</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="selectAllFiltered()" class="text-xs font-bold text-teal-700 hover:underline px-2 py-1">현재 목록 전체 담기</button>
-            <span class="text-slate-300">|</span>
-            <button onclick="clearAllSelected()" class="text-xs font-bold text-slate-500 hover:text-rose-600 px-2 py-1">선택 초기화</button>
-          </div>
-        </div>
-
-        <!-- Cards Grid -->
-        <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Cards Grid (Clean & Scannable) -->
+        <div id="places-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
           <!-- Populated dynamically by JS -->
         </div>
       </div>
     </section>
 
     <!-- =============================================================== -->
-    <!-- PAGE 3: 홍콩 인터랙티브 여행 지도 & 동선 시각화 (MAP VIEW)       -->
+    <!-- PAGE 3: 홍콩 인터랙티브 여행 지도 & 구글 지도 동기화 (MAP VIEW)   -->
     <!-- =============================================================== -->
     <section id="page-3" class="page-section">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <!-- Map Top Control Bar -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-700">STEP 3</span>
-              <h2 class="text-lg sm:text-xl font-black text-slate-900">홍콩 인터랙티브 동선 지도 & 구간별 이동수단 추천</h2>
+        <!-- Map Top Control Bar + GOOGLE MAPS SYNC HUB -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-col gap-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">STEP 3 · API 키 불필요 오픈맵 & 구글지도 동기화</span>
+                <h2 class="text-lg sm:text-xl font-black text-slate-900">홍콩 인터랙티브 동선 지도 & 구글 지도 동기화</h2>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                API Key 없이 100% 작동하는 홍콩 지도입니다. 아래 <strong>[구글 지도 앱에 전 일정 동기화]</strong> 버튼으로 내 스마트폰 구글 지도에 코스를 바로 띄우세요!
+              </p>
             </div>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-              일자별 동선(Day 1 ~ Day N)을 선택하면 장소 간 거리와 최적 이동수단(스타페리, MTR, 딩딩이 트램, 도보)을 자동으로 안내합니다.
-            </p>
+
+            <!-- Dynamic Map Mode Filter Buttons -->
+            <div id="map-mode-buttons-bar" class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+              <!-- Populated dynamically based on tripDays -->
+            </div>
           </div>
 
-          <!-- Dynamic Map Mode Filter Buttons -->
-          <div id="map-mode-buttons-bar" class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-            <!-- Populated dynamically based on tripDays -->
+          <!-- GOOGLE MAPS MULTI-STOP SYNC BAR -->
+          <div class="bg-gradient-to-r from-blue-950 via-indigo-950 to-slate-900 text-white rounded-2xl p-3.5 sm:p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border border-blue-400/20">
+            <div class="flex items-start sm:items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shrink-0 shadow">
+                <i class="fa-brands fa-google"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold text-amber-300">GOOGLE MAPS MULTI-STOP SYNC</span>
+                  <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-blue-200">모바일·PC 완벽 호환</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-black">내가 짠 모든 일정을 구글 지도(Google Maps)에 한 번에 동기화하기</h3>
+              </div>
+            </div>
+
+            <div id="google-sync-day-buttons" class="flex flex-wrap items-center gap-1.5">
+              <!-- Populated dynamically by renderGoogleSyncBar() -->
+            </div>
           </div>
         </div>
 
         <!-- Map + Sidebar Split Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <!-- Left Sidebar: Spot List & Distance/Transit Summary -->
-          <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[540px] lg:h-[640px] overflow-hidden">
-            <div class="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-              <div>
-                <h3 id="map-sidebar-title" class="text-sm font-extrabold text-slate-800">지도에 표시된 장소</h3>
-                <p id="map-route-summary" class="text-xs text-slate-500 mt-0.5">마커를 클릭하면 상세 정보와 구글 지도 길찾기가 열립니다.</p>
+          <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[460px] lg:h-[640px] overflow-hidden order-2 lg:order-1">
+            <!-- Map Page Embedded Google Map Search Bar -->
+            <div class="p-3 bg-slate-900 text-white border-b border-slate-800">
+              <div class="text-[11px] font-extrabold text-amber-300 mb-1.5 flex items-center justify-between">
+                <span><i class="fa-brands fa-google mr-1"></i>지도 내 실시간 검색 & 구글맵 연동</span>
+                <span class="text-[10px] text-slate-400">iOS/모바일 최적화</span>
               </div>
-              <button onclick="autoAssignSmartRoute(); setMapMode('DAY1');" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-2.5 py-1.5 rounded-lg shadow-sm transition shrink-0">
-                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>자동 동선 묶기
-              </button>
+              <div class="flex gap-1.5">
+                <input
+                  id="map-page-search-input"
+                  type="text"
+                  oninput="filterMapSidebarByKeyword(this.value)"
+                  onkeydown="if(event.key==='Enter'){ event.preventDefault(); openExternalMapFromMapPage('google'); }"
+                  placeholder="장소·숙소명 검색 (예: YMCA, 피크트램)..."
+                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
+                />
+                <button onclick="openExternalMapFromMapPage('google')" class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold shrink-0" title="구글 지도 앱/웹으로 검색">
+                  구글맵
+                </button>
+                <button onclick="openExternalMapFromMapPage('apple')" class="px-2.5 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-extrabold shrink-0" title="아이폰 애플 지도로 검색">
+                  <i class="fa-brands fa-apple"></i>
+                </button>
+              </div>
             </div>
 
-            <!-- Legend -->
-            <div class="px-4 py-2 bg-white border-b border-slate-100 flex flex-wrap gap-3 text-[11px] font-bold text-slate-600">
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>맛집/노포</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>디저트/카페</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>랜드마크/야경</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 inline-block"></span>포토/쇼핑</span>
+            <!-- Route Summary Header -->
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <div id="map-sidebar-title" class="text-xs sm:text-sm font-black text-slate-900">홍콩 전체 추천 스팟 (42곳)</div>
+              <div id="map-route-summary" class="text-[11px] text-slate-500 mt-0.5">장소를 클릭하면 해당 위치로 지도가 이동합니다.</div>
             </div>
 
-            <!-- Scrollable List of Spots on Map -->
+            <!-- Scrollable Spot & Route List -->
             <div id="map-sidebar-list" class="flex-grow overflow-y-auto p-3 space-y-2.5">
-              <!-- Populated by JS -->
+              <!-- Populated by renderMapSidebar() -->
             </div>
           </div>
 
-          <!-- Right Area: Leaflet Interactive Map Container -->
-          <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[540px] lg:h-[640px] relative">
-            <div id="hk-leaflet-map" class="w-full h-full z-10"></div>
+          <!-- Right Area: Leaflet Interactive Map Container + Fallback Embed Viewer -->
+          <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[440px] sm:h-[520px] lg:h-[640px] relative order-1 lg:order-2">
+            <!-- Top Map Engine Switcher Bar (Interactive Pin Map vs Google Map Embed Preview) -->
+            <div class="bg-slate-900 text-white px-3.5 py-2 flex items-center justify-between text-xs z-20 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="active-map-engine-label" class="font-bold text-slate-200">인터랙티브 동선 핀 지도 (No API Key · 실시간 작동)</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="switchMapEngine('leaflet')" id="btn-engine-leaflet" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-extrabold text-[11px] transition">
+                  📍 동선 핀 지도
+                </button>
+                <button onclick="switchMapEngine('gmap_embed')" id="btn-engine-gmap" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-300 font-extrabold text-[11px] transition">
+                  <i class="fa-brands fa-google mr-1"></i>구글 지도 임베드 뷰
+                </button>
+              </div>
+            </div>
+
+            <!-- Engine 1: Leaflet Interactive Pin & Polyline Map -->
+            <div id="hk-leaflet-map" class="w-full flex-grow z-10"></div>
+
+            <!-- Engine 2: Keyless Google Maps Embed iframe (No API Key Required!) -->
+            <div id="hk-google-embed-container" class="w-full flex-grow z-10 hidden bg-slate-100 relative">
+              <iframe
+                id="hk-google-embed-iframe"
+                class="w-full h-full border-0"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://maps.google.com/maps?q=The+Salisbury+YMCA+of+Hong+Kong&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              ></iframe>
+            </div>
 
             <!-- Floating Quick Region Jump Buttons -->
-            <div class="absolute bottom-4 left-4 right-4 z-20 flex flex-wrap gap-1.5 pointer-events-none">
-              <div class="bg-slate-900/90 backdrop-blur-md text-white p-2 rounded-xl shadow-lg flex flex-wrap items-center gap-1.5 pointer-events-auto border border-white/15">
-                <span class="text-[11px] font-bold text-amber-300 px-1.5"><i class="fa-solid fa-compass mr-1"></i>빠른 지역 이동:</span>
-                <button onclick="flyToRegion(22.2819, 114.1556, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">센트럴·소호</button>
-                <button onclick="flyToRegion(22.2950, 114.1722, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">침사추이·하버</button>
-                <button onclick="flyToRegion(22.3160, 114.1700, 14)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">몽콕·조던</button>
-                <button onclick="flyToRegion(22.2839, 114.2122, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">익청빌딩</button>
-                <button onclick="flyToRegion(22.3010, 113.9800, 12)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition">디즈니·옹핑</button>
+            <div class="absolute bottom-3 left-3 right-3 z-20 flex flex-wrap gap-1.5 pointer-events-none">
+              <div class="bg-slate-900/90 backdrop-blur-md text-white p-2 rounded-xl shadow-lg flex items-center gap-1.5 pointer-events-auto border border-white/15 overflow-x-auto no-scrollbar max-w-full">
+                <span class="text-[11px] font-bold text-amber-300 px-1.5 shrink-0"><i class="fa-solid fa-compass mr-1"></i>빠른 이동:</span>
+                <button onclick="flyToRegion(22.2947, 114.1704, 16)" class="text-xs bg-teal-600/80 hover:bg-teal-500 px-2.5 py-1 rounded-lg font-bold transition whitespace-nowrap shrink-0">🏨 침사추이 YMCA</button>
+                <button onclick="flyToRegion(22.2819, 114.1556, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition whitespace-nowrap shrink-0">센트럴·소호</button>
+                <button onclick="flyToRegion(22.2950, 114.1722, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition whitespace-nowrap shrink-0">침사추이·하버</button>
+                <button onclick="flyToRegion(22.3160, 114.1700, 14)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition whitespace-nowrap shrink-0">몽콕·조던</button>
+                <button onclick="flyToRegion(22.2839, 114.2122, 15)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition whitespace-nowrap shrink-0">익청빌딩</button>
+                <button onclick="flyToRegion(22.3010, 113.9800, 12)" class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-lg font-semibold transition whitespace-nowrap shrink-0">디즈니·옹핑</button>
               </div>
             </div>
           </div>
@@ -817,11 +963,19 @@
                 <span>AI 지역별 최적 동선 자동 배정</span>
               </button>
               <button
-                onclick="switchPage(2)"
-                class="flex items-center gap-1.5 px-3.5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/15 transition"
+                onclick="syncDayToGoogleMaps('ALL')"
+                class="flex items-center gap-1.5 px-3.5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm shadow transition"
               >
-                <i class="fa-solid fa-plus"></i>
-                <span>장소 더 담기</span>
+                <i class="fa-brands fa-google"></i>
+                <span>구글 지도 전체 경로 동기화</span>
+              </button>
+              <button
+                onclick="exportGoogleMyMapsKML()"
+                class="flex items-center gap-1.5 px-3.5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 font-bold text-xs sm:text-sm border border-white/15 transition"
+                title="구글 내 지도(Google My Maps)에 가져올 수 있는 KML 파일을 다운로드합니다"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span>구글 내 지도(.KML) 저장</span>
               </button>
             </div>
           </div>
@@ -883,17 +1037,21 @@
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
+            <button onclick="syncDayToGoogleMaps('ALL')" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs sm:text-sm transition shadow-sm">
+              <i class="fa-brands fa-google"></i>
+              <span>구글 지도 앱에 전 일정 동기화</span>
+            </button>
+            <button onclick="exportGoogleMyMapsKML()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm transition shadow-sm">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>구글 내 지도(KML) 내보내기</span>
+            </button>
             <button onclick="copyItineraryText()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-sm">
               <i class="fa-solid fa-copy"></i>
-              <span>카카오톡/메모장 텍스트 복사</span>
+              <span>카카오톡 텍스트 복사</span>
             </button>
             <button onclick="window.print()" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm transition shadow-sm">
               <i class="fa-solid fa-print"></i>
-              <span>인쇄 / PDF 저장</span>
-            </button>
-            <button onclick="saveToLocalStorage(true)" class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition">
-              <i class="fa-solid fa-floppy-disk text-teal-300"></i>
-              <span>브라우저 저장</span>
+              <span>인쇄 / PDF</span>
             </button>
           </div>
         </div>
@@ -1000,7 +1158,7 @@
   <!-- ================================================================= -->
   <!-- STICKY BOTTOM PAGE SPLIT CONTROLLER (PREV / NEXT STEP)            -->
   <!-- ================================================================= -->
-  <footer class="sticky bottom-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3 px-4 sm:px-6 no-print shadow-lg">
+  <footer class="sticky bottom-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3 px-4 sm:px-6 no-print shadow-lg safe-bottom">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <button
         id="btn-prev-page"
@@ -1072,6 +1230,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">카테고리</label>
             <select id="custom-category" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500">
+              <option value="인기 숙소 & 호텔">🏨 인기 숙소 & 호텔</option>
               <option value="미슐랭 & 노포 맛집">🍜 미슐랭 & 노포 맛집</option>
               <option value="인스타 바이럴 디저트/카페">🥧 인스타 바이럴 디저트/카페</option>
               <option value="필수 랜드마크/야경">🌃 필수 랜드마크/야경</option>
@@ -1600,6 +1759,348 @@
         lng: 114.1277,
         recommendedDay: 2,
         recommendedTime: '16:30'
+      },
+      {
+        id: 'hk-25',
+        name: '솔즈베리 YMCA 오브 홍콩 (The Salisbury - YMCA)',
+        nameEn: 'The Salisbury - YMCA of Hong Kong Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '인기 숙소 & 호텔',
+        rating: 4.5,
+        reviews: '4,300+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#하버뷰가성비1위숙소', '#침사추이최고명당', '#페닌슐라호텔바로옆'],
+        signature: '파노라마 빅토리아 하버뷰 객실 (1881 헤리티지·스타페리 선착장 도보 2분)',
+        priceHKD: 1350,
+        hours: '체크인 15:00 / 체크아웃 11:00',
+        tip: '페닌슐라 호텔 바로 옆에 위치해 수백만 원짜리 5성급 호텔과 똑같은 빅토리아 하버 야경을 1/3 가격에 누릴 수 있는 홍콩 최고 인기 숙소! 공항에서 A21번 버스(14번 정류장 Middle Road) 하차 후 도보 2분.',
+        lat: 22.2947,
+        lng: 114.1704,
+        recommendedDay: 1,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-26',
+        name: '호텔 아이콘 (Hotel ICON 침사추이)',
+        nameEn: 'Hotel ICON Tsim Sha Tsui East Hong Kong',
+        district: '침사추이/구룡',
+        category: '인기 숙소 & 호텔',
+        rating: 4.7,
+        reviews: '5,600+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#야외온수수영장하버뷰', '#더마켓뷔페', '#한국인만족도최고'],
+        signature: '9층 야외 루프탑 하버뷰 수영장 & 홍콩 최고 해산물 뷔페 The Market',
+        priceHKD: 1950,
+        hours: '체크인 15:00 / 체크아웃 11:00',
+        tip: '홍콩 폴리텍 대학교에서 운영하는 5성급 디자인 호텔로 서비스와 조식·애프터눈티 퀄리티가 압도적입니다. 침사추이 K11까지 무료 셔틀버스를 운행합니다.',
+        lat: 22.3005,
+        lng: 114.1796,
+        recommendedDay: 1,
+        recommendedTime: '15:00'
+      },
+      {
+        id: 'hk-27',
+        name: '더 로얄 퍼시픽 호텔 & 타워즈',
+        nameEn: 'The Royal Pacific Hotel & Towers Hong Kong',
+        district: '침사추이/구룡',
+        category: '인기 숙소 & 호텔',
+        rating: 4.3,
+        reviews: '3,900+',
+        viralTags: ['구글평점TOP', '여행사필수'],
+        hashtags: ['#하버시티연결', '#마카오페리터미널직결', '#침사추이쇼핑최적'],
+        signature: '하버시티 쇼핑몰 도보 1분 & 구룡 마카오 페리 터미널 건물 직결',
+        priceHKD: 1150,
+        hours: '체크인 15:00 / 체크아웃 11:00',
+        tip: '구룡 공원과 하버시티 쇼핑몰 바로 옆이라 침사추이 도보 여행에 최적화된 가성비 4성급 호텔입니다. 피어스 타워(Pierside) 객실의 오션뷰가 훌륭합니다.',
+        lat: 22.3001,
+        lng: 114.1674,
+        recommendedDay: 1,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-28',
+        name: '이비스 홍콩 센트럴 & 셩완 (Ibis Central & Sheung Wan)',
+        nameEn: 'ibis Hong Kong Central & Sheung Wan',
+        district: '센트럴/소호',
+        category: '인기 숙소 & 호텔',
+        rating: 4.3,
+        reviews: '5,100+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#나혼자여행가성비원탑', '#공항버스A11호텔앞정차', '#트램정류장1분'],
+        signature: '하버뷰 객실, 1층 스타벅스, 공항버스 A11 정류장 & 트램 정류장 호텔 바로 앞',
+        priceHKD: 950,
+        hours: '체크인 15:00 / 체크아웃 12:00',
+        tip: '홍콩섬 센트럴·소호·란콰이퐁 도보 여행자들의 부동의 1위 숙소! 공항에서 A11번 버스를 타면 호텔 건너편(마카오 페리 터미널)에 바로 내려 환승이 전혀 필요 없습니다.',
+        lat: 22.2877,
+        lng: 114.1477,
+        recommendedDay: 2,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-29',
+        name: '더 피고 호텔 (The Figo 소호/셩완)',
+        nameEn: 'The Figo Hotel Hong Kong Sheung Wan',
+        district: '센트럴/소호',
+        category: '인기 숙소 & 호텔',
+        rating: 4.5,
+        reviews: '1,400+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#감성부티크호텔', '#무료해피아워와인', '#소호도보투어'],
+        signature: '트렌디한 라운지 & 저녁 해피아워 무료 주류/스낵 제공 부티크 호텔',
+        priceHKD: 1100,
+        hours: '체크인 15:00 / 체크아웃 12:00',
+        tip: '카우키, 싱흥유엔, 소호 벽화거리까지 걸어서 5~7분! 인테리어가 감각적이고 친절해 혼자 또는 커플 여행객에게 최근 블로그에서 극찬받는 숙소입니다.',
+        lat: 22.2861,
+        lng: 114.1466,
+        recommendedDay: 2,
+        recommendedTime: '15:00'
+      },
+      {
+        id: 'hk-30',
+        name: '코디스 홍콩 (Cordis, Hong Kong 몽콕)',
+        nameEn: 'Cordis Hong Kong Mong Kok',
+        district: '몽콕/야우마테이',
+        category: '인기 숙소 & 호텔',
+        rating: 4.6,
+        reviews: '4,800+',
+        viralTags: ['구글평점TOP', '여행사필수'],
+        hashtags: ['#몽콕MTR역직결', '#랑함플레이스몰직결', '#미슐랭밍코트'],
+        signature: '몽콕역 및 대형 쇼핑몰 랑함플레이스 실내 직결 5성급 럭셔리 호텔',
+        priceHKD: 1600,
+        hours: '체크인 15:00 / 체크아웃 12:00',
+        tip: '비가 오나 더우나 MTR 몽콕역과 쇼핑몰을 실내 통로로 이동할 수 있어 부모님 동반이나 쇼핑·야시장 투어에 최고입니다.',
+        lat: 22.3183,
+        lng: 114.1685,
+        recommendedDay: 3,
+        recommendedTime: '15:00'
+      },
+      {
+        id: 'hk-31',
+        name: '해시태그 B (Hashtag B 침사추이/코즈웨이베이)',
+        nameEn: 'Hashtag B Tsim Sha Tsui Carnarvon Road',
+        district: '침사추이/구룡',
+        category: '인스타 바이럴 디저트/카페',
+        rating: 4.6,
+        reviews: '2,400+',
+        viralTags: ['인스타바이럴', '구글평점TOP'],
+        hashtags: ['#나폴레옹에그타르트', '#요즘홍콩바이럴1위', '#꽃모양타르트'],
+        signature: '나폴레옹 밀푀유 에그타르트 (HK$ 18), 얼그레이·피스타치오 타르트',
+        priceHKD: 54,
+        hours: '08:30 - 21:00 (타르트 나오는 시간 오전 10:30~)',
+        tip: '최근 인스타그램과 유튜브에서 베이크하우스 못지않게 폭발적인 인기를 끌고 있는 꽃 모양 페스트리 에그타르트! 바삭한 식감과 카라멜 필링이 환상적입니다.',
+        lat: 22.2992,
+        lng: 114.1735,
+        recommendedDay: 1,
+        recommendedTime: '15:15'
+      },
+      {
+        id: 'hk-32',
+        name: '제니베이커리 침사추이 (Jenny Bakery 미라도맨션)',
+        nameEn: 'Jenny Bakery Tsim Sha Tsui Mirador Mansion',
+        district: '침사추이/구룡',
+        category: '인스타 바이럴 디저트/카페',
+        rating: 4.3,
+        reviews: '8,900+',
+        viralTags: ['여행사필수', '인스타바이럴'],
+        hashtags: ['#홍콩기념품1위', '#마약버터쿠키', '#마카다미아초코'],
+        signature: '4믹스/2믹스 버터 플라워 쿠키 틴케이스 & 마카다미아 크랜베리 누가',
+        priceHKD: 150,
+        hours: '09:00 - 19:00',
+        tip: '침사추이역 D2 출구 바로 앞 미라도 맨션 2층(1F)에 위치! 길거리 짝퉁 호객꾼을 피해서 건물 안 계단으로 올라가세요. 오직 현금(HKD) 결제만 가능합니다.',
+        lat: 22.2971,
+        lng: 114.1722,
+        recommendedDay: 1,
+        recommendedTime: '11:30'
+      },
+      {
+        id: 'hk-33',
+        name: '팀호완 삼수이포 본점 / 센트럴점 (Tim Ho Wan)',
+        nameEn: 'Tim Ho Wan Sham Shui Po / Central IFC',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.3,
+        reviews: '11,200+',
+        viralTags: ['미슐랭노포', '여행사필수'],
+        hashtags: ['#세상에서가장싼미슐랭', '#구운차슈바오', '#딤섬성지'],
+        signature: '베이크드 차슈바오(달콤 바삭한 바비큐 번), 새우 하가우, 창펀',
+        priceHKD: 95,
+        hours: '10:00 - 21:30',
+        tip: '메론빵처럼 겉은 바삭하고 속은 단짠 돼지고기 소가 가득한 구운 차슈바오는 1인 1접시 필수입니다!',
+        lat: 22.3318,
+        lng: 114.1656,
+        recommendedDay: 3,
+        recommendedTime: '11:30'
+      },
+      {
+        id: 'hk-34',
+        name: '막만키 누들샵 (Mak Man Kee 조던역)',
+        nameEn: 'Mak Man Kee Noodle Shop Jordan',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.3,
+        reviews: '6,500+',
+        viralTags: ['미슐랭노포', '구글평점TOP'],
+        hashtags: ['#8년연속미슐랭빕구르망', '#통새우완탕면', '#오스트레일리아우유공사옆'],
+        signature: '100% 통새우 완탕면 (Tossed or Soup), 족발 조림 비빔면',
+        priceHKD: 52,
+        hours: '12:00 - 00:30',
+        tip: '오스트레일리아 데어리 컴퍼니 바로 옆집! 돼지고기 없이 오직 탱글한 통새우만 가득 채운 정통 광둥식 완탕면의 진수를 맛볼 수 있습니다.',
+        lat: 22.3048,
+        lng: 114.1704,
+        recommendedDay: 3,
+        recommendedTime: '18:30'
+      },
+      {
+        id: 'hk-35',
+        name: '힝키 레스토랑 (Hing Kee 뽀짜이판/솥밥)',
+        nameEn: 'Hing Kee Restaurant Temple Street Yau Ma Tei',
+        district: '몽콕/야우마테이',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.1,
+        reviews: '4,800+',
+        viralTags: ['미슐랭노포', '인스타바이럴'],
+        hashtags: ['#백종원스푸파', '#홍콩밤거리감성', '#뽀짜이판과굴전'],
+        signature: '소고기 다짐육 계란 뽀짜이판(질냄비 솥밥) + 바삭한 굴전 + 청도맥주',
+        priceHKD: 115,
+        hours: '13:30 - 00:30',
+        tip: '솥밥 뚜껑을 열고 테이블에 있는 특제 간장 소스를 2~3바퀴 두른 뒤 다시 뚜껑을 닫아 1분간 누룽지를 만들어 먹으면 감동적인 맛입니다!',
+        lat: 22.3102,
+        lng: 114.1702,
+        recommendedDay: 3,
+        recommendedTime: '20:45'
+      },
+      {
+        id: 'hk-36',
+        name: '호흥키 (Ho Hung Kee 코즈웨이베이 하이산플레이스)',
+        nameEn: 'Ho Hung Kee Causeway Bay Hysan Place',
+        district: '코즈웨이베이/동부',
+        category: '미슐랭 & 노포 맛집',
+        rating: 4.4,
+        reviews: '4,100+',
+        viralTags: ['미슐랭노포', '구글평점TOP'],
+        hashtags: ['#미슐랭1스타완탕면', '#소고기볶음면최강', '#깔끔한쇼핑몰식당'],
+        signature: '미슐랭 1스타 완탕면 & 불맛 가득 소고기 납작 볶음면 (곤차우응아우호)',
+        priceHKD: 135,
+        hours: '11:30 - 22:30',
+        tip: '노포 위생이 걱정되는 분들에게 강력 추천! 코즈웨이베이 하이산 플레이스 쇼핑몰 12층에 위치해 에어컨 빵빵하고 쾌적하게 미슐랭 1스타 요리를 즐길 수 있습니다.',
+        lat: 22.2798,
+        lng: 114.1839,
+        recommendedDay: 3,
+        recommendedTime: '14:00'
+      },
+      {
+        id: 'hk-37',
+        name: 'K11 뮤제아 (K11 MUSEA 침사추이)',
+        nameEn: 'K11 MUSEA Victoria Dockside Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.7,
+        reviews: '18,900+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#예술과쇼핑의결합', '#포트넘앤메이슨', '#스타의거리직결'],
+        signature: '오페라 하우스 같은 황금빛 아트리움, 포트넘앤메이슨 티살롱, 모마 디자인 스토어',
+        priceHKD: 0,
+        hours: '10:00 - 22:00',
+        tip: '스타의 거리 바로 옆! 더운 낮 시간에 시원하게 예술 작품 같은 실내 건축을 감상하고 지하 푸드코트나 루프탑 정원을 둘러보기 최고입니다.',
+        lat: 22.2941,
+        lng: 114.1743,
+        recommendedDay: 1,
+        recommendedTime: '17:00'
+      },
+      {
+        id: 'hk-38',
+        name: '피크 서클 워크 & 루가드 로드 전망대 (Lugard Road)',
+        nameEn: 'Lugard Road Lookout Victoria Peak',
+        district: '센트럴/소호',
+        category: '필수 랜드마크/야경',
+        rating: 4.9,
+        reviews: '7,200+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#무료피크전망대', '#유료전망대보다예쁨', '#현지인시크릿뷰'],
+        signature: '피크 타워 왼쪽 숲길을 따라 15분 걸으면 나타나는 무료 파노라마 야경 명소',
+        priceHKD: 0,
+        hours: '24시간 개방 (해 질 녘 추천)',
+        tip: '유료 전망대(스카이 테라스 428)에 사람이 너무 많다면 피크트램 하차 후 왼쪽 Lugard Road 표지판을 따라 15분만 걸어가 보세요. 장애물 없는 최고의 무료 홍콩 야경이 펼쳐집니다!',
+        lat: 22.2788,
+        lng: 114.1476,
+        recommendedDay: 2,
+        recommendedTime: '18:30'
+      },
+      {
+        id: 'hk-39',
+        name: '완차이 블루하우스 & 리퉁 애비뉴 (Lee Tung Avenue)',
+        nameEn: 'Lee Tung Avenue and Blue House Wan Chai',
+        district: '코즈웨이베이/동부',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.5,
+        reviews: '8,400+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#홍콩전통홍등거리', '#유네스코문화유산', '#완차이감성산책'],
+        signature: '붉은 홍등이 하늘을 수놓는 유럽풍 보행자 거리 & 100년 역사의 파란색 목조 건물',
+        priceHKD: 0,
+        hours: '10:00 - 22:00',
+        tip: '완차이역 D출구 바로 앞! 리퉁 애비뉴에는 베이크하우스 완차이점도 있어 소호점보다 에그타르트를 여유롭게 구매할 수 있습니다.',
+        lat: 22.2756,
+        lng: 114.1721,
+        recommendedDay: 3,
+        recommendedTime: '16:45'
+      },
+      {
+        id: 'hk-40',
+        name: '리펄스 베이 & 스탠리 마켓 (Repulse Bay & Stanley)',
+        nameEn: 'Repulse Bay Beach and Stanley Market Hong Kong',
+        district: '란타우/디즈니',
+        category: '필수 랜드마크/야경',
+        rating: 4.6,
+        reviews: '13,500+',
+        viralTags: ['구글평점TOP', '여행사필수'],
+        hashtags: ['#홍콩의니스', '#2층버스해안도로', '#이국적인해변'],
+        signature: '센트럴에서 6번/260번 2층 버스를 타고 달리는 환상적인 남부 해안선 투어',
+        priceHKD: 15,
+        hours: '09:00 - 20:00',
+        tip: '도심 빌딩 숲과 전혀 다른 유럽 휴양지 감성! 센트럴 익스체인지 스퀘어에서 260번 2층 버스 2층 오른쪽 좌석에 앉아 해안 절벽 뷰를 감상하세요.',
+        lat: 22.2366,
+        lng: 114.1973,
+        recommendedDay: 4,
+        recommendedTime: '11:00'
+      },
+      {
+        id: 'hk-41',
+        name: '더 페닌슐라 홍콩 (The Peninsula 애프터눈티 & 숙박)',
+        nameEn: 'The Peninsula Hong Kong Tsim Sha Tsui',
+        district: '침사추이/구룡',
+        category: '인기 숙소 & 호텔',
+        rating: 4.8,
+        reviews: '9,400+',
+        viralTags: ['구글평점TOP', '인스타바이럴', '여행사필수'],
+        hashtags: ['#동양의귀부인', '#클래식애프터눈티', '#솔즈베리YMCA바로옆'],
+        signature: '클래식 현악 4중주 라이브 연주와 함께 즐기는 더 로비(The Lobby) 애프터눈 티',
+        priceHKD: 520,
+        hours: '애프터눈티 14:00 - 18:00',
+        tip: '숙박하지 않더라도 1층 더 로비에서 즐기는 클래식 애프터눈 티(1인 약 HK$ 520)는 홍콩 럭셔리 여행의 로망입니다. 오후 1시 15분부터 현장 줄서기가 시작됩니다.',
+        lat: 22.2951,
+        lng: 114.1718,
+        recommendedDay: 1,
+        recommendedTime: '14:30'
+      },
+      {
+        id: 'hk-42',
+        name: '포시즌스 호텔 홍콩 (Four Seasons Central)',
+        nameEn: 'Four Seasons Hotel Hong Kong Central IFC',
+        district: '센트럴/소호',
+        category: '인기 숙소 & 호텔',
+        rating: 4.8,
+        reviews: '6,100+',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#미슐랭별8개호텔', '#인피니티풀하버뷰', '#홍콩역AEL직결'],
+        signature: '빅토리아 하버와 맞닿은 인피니티 풀 & 미슐랭 3스타 룽킹힌(Lung King Heen)',
+        priceHKD: 4200,
+        hours: '체크인 15:00 / 체크아웃 12:00',
+        tip: 'AEL 홍콩역 및 IFC몰과 실내 통로로 완벽 직결되어 있어 이동 편의성과 럭셔리 호캉스 끝판왕을 원하는 분께 최고의 선택입니다.',
+        lat: 22.2866,
+        lng: 114.1569,
+        recommendedDay: 2,
+        recommendedTime: '15:00'
       }
     ];
 
@@ -1627,8 +2128,8 @@
       tripVibe: '미식 & 인스타 핫플 정복',
       exchangeRate: 180,
       flight: {
-        startDate: '2025-05-01',
-        endDate: '2025-05-04',
+        startDate: '2026-11-20',
+        endDate: '2026-11-23',
         outboundPreset: '09:00|11:55|3시간 55분',
         inboundPreset: '17:50|22:25|3시간 35분',
         day1CityArrivalTime: '13:30',
@@ -1648,9 +2149,12 @@
         district: 'ALL',
         category: 'ALL',
         viral: 'ALL',
+        priceTier: 'ALL',
+        sortBy: 'RECOMMENDED',
         selectedOnly: false
       },
       mapMode: 'ALL',
+      mapEngine: 'leaflet',
       builderDayView: 'ALL',
       places: [...INITIAL_PLACES],
       // selectedItems holds { id, day, time, budgetHKD, memo }
@@ -1716,10 +2220,20 @@
         if (parsed.tripDurationLabel) appState.tripDurationLabel = parsed.tripDurationLabel;
         if (parsed.tripVibe) appState.tripVibe = parsed.tripVibe;
         if (parsed.exchangeRate) appState.exchangeRate = parsed.exchangeRate;
-        if (parsed.flight) appState.flight = { ...appState.flight, ...parsed.flight };
+        if (parsed.flight) {
+          appState.flight = { ...appState.flight, ...parsed.flight };
+          // Auto-upgrade legacy 2025 default dates to 2026
+          if (appState.flight.startDate && appState.flight.startDate.startsWith('2025-')) {
+            appState.flight.startDate = '2026-11-20';
+            appState.flight.endDate = '2026-11-23';
+          }
+        }
         if (parsed.transport) appState.transport = { ...appState.transport, ...parsed.transport };
         if (Array.isArray(parsed.places) && parsed.places.length >= 24) {
-          appState.places = parsed.places;
+          // Ensure newly added spots (hk-25 ~ hk-42) are merged if loading from older cache
+          const existingIds = new Set(parsed.places.map(p => p.id));
+          const missingInitials = INITIAL_PLACES.filter(p => !existingIds.has(p.id));
+          appState.places = [...parsed.places, ...missingInitials];
         }
         if (Array.isArray(parsed.selectedItems)) {
           appState.selectedItems = parsed.selectedItems;
@@ -1760,6 +2274,21 @@
       const nh = String(Math.floor(total / 60)).padStart(2, '0');
       const nm = String(total % 60).padStart(2, '0');
       return `${nh}:${nm}`;
+    }
+
+    function setQuickTodayDates() {
+      const base = new Date();
+      // Ensure 2026+ date
+      if (base.getFullYear() < 2026) {
+        base.setFullYear(2026);
+      }
+      const start = new Date(base.getTime() + 7 * 86400000);
+      const end = new Date(start.getTime() + 3 * 86400000);
+      const sStr = start.toISOString().split('T')[0];
+      const eStr = end.toISOString().split('T')[0];
+      document.getElementById('calc-start-date').value = sStr;
+      document.getElementById('calc-end-date').value = eStr;
+      calculateFlightAndDuration(false);
     }
 
     function calculateFlightAndDuration(silent = false) {
@@ -1856,6 +2385,34 @@
     /**
      * 4-C. AIRPORT <-> CITY TRANSPORT SIMULATOR & COMPARISON
      */
+    function handleHotelPresetChange() {
+      const presetEl = document.getElementById('sim-hotel-preset');
+      const areaEl = document.getElementById('sim-hotel-area');
+      if (!presetEl || !areaEl) return;
+
+      const [hotelId, areaName] = presetEl.value.split('|');
+      areaEl.value = areaName;
+      renderAirportTransportComparison();
+
+      if (hotelId !== 'custom') {
+        const hotelObj = appState.places.find(p => p.id === hotelId);
+        if (hotelObj && !isPlaceSelected(hotelId)) {
+          appState.selectedItems.unshift({
+            id: hotelObj.id,
+            day: 1,
+            time: '14:00',
+            budgetHKD: hotelObj.priceHKD || 0,
+            memo: `🏨 숙소 체크인/짐보관 (${hotelObj.signature})`
+          });
+          syncAllViews();
+          saveToLocalStorage(false);
+          showToast(`🏨 선택한 숙소 '${hotelObj.name}'가 일정표 Day 1에 자동 반영되었습니다!`);
+        } else if (hotelObj) {
+          showToast(`🏨 '${hotelObj.name}' 기준으로 공항 이동수단을 계산했습니다.`);
+        }
+      }
+    }
+
     function renderAirportTransportComparison() {
       const areaEl = document.getElementById('sim-hotel-area');
       const paxEl = document.getElementById('sim-pax');
@@ -2184,51 +2741,85 @@
     function setFilter(type, value) {
       appState.filters[type] = value;
 
-      // Update active pill UI
-      if (type === 'district') {
-        document.querySelectorAll('.district-pill').forEach(btn => {
-          const active = btn.getAttribute('data-val') === value;
-          btn.className = active
-            ? 'district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm transition'
-            : 'district-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
-        });
-      } else if (type === 'category') {
+      if (type === 'category') {
         document.querySelectorAll('.category-pill').forEach(btn => {
           const active = btn.getAttribute('data-val') === value;
           btn.className = active
-            ? 'category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-sm transition'
-            : 'category-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+            ? 'category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white shadow-sm transition'
+            : 'category-pill shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
         });
+      } else if (type === 'district') {
+        const el = document.getElementById('select-filter-district');
+        if (el) el.value = value;
       } else if (type === 'viral') {
-        document.querySelectorAll('.viral-pill').forEach(btn => {
-          const active = btn.getAttribute('data-val') === value;
-          btn.className = active
-            ? 'viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm transition'
-            : 'viral-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
-        });
+        const el = document.getElementById('select-filter-viral');
+        if (el) el.value = value;
+      } else if (type === 'priceTier') {
+        const el = document.getElementById('select-filter-price');
+        if (el) el.value = value;
+      } else if (type === 'sortBy') {
+        const el = document.getElementById('select-sort-by');
+        if (el) el.value = value;
       }
 
       renderPlaceCards();
+    }
+
+    function resetExplorerFilters() {
+      appState.filters = {
+        district: 'ALL',
+        category: 'ALL',
+        viral: 'ALL',
+        priceTier: 'ALL',
+        sortBy: 'RECOMMENDED',
+        selectedOnly: false
+      };
+
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.value = '';
+
+      const dSel = document.getElementById('select-filter-district');
+      if (dSel) dSel.value = 'ALL';
+      const vSel = document.getElementById('select-filter-viral');
+      if (vSel) vSel.value = 'ALL';
+      const pSel = document.getElementById('select-filter-price');
+      if (pSel) pSel.value = 'ALL';
+      const sSel = document.getElementById('select-sort-by');
+      if (sSel) sSel.value = 'RECOMMENDED';
+
+      const selBtn = document.getElementById('btn-filter-selected');
+      if (selBtn) {
+        selBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+      }
+
+      setFilter('category', 'ALL');
+      showToast('🔄 모든 검색어와 탐색 필터가 초기화되었습니다!');
     }
 
     function toggleSelectedOnlyFilter() {
       appState.filters.selectedOnly = !appState.filters.selectedOnly;
       const btn = document.getElementById('btn-filter-selected');
       if (appState.filters.selectedOnly) {
-        btn.className = 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-rose-600 bg-rose-50 text-rose-700 transition';
+        btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-rose-600 bg-rose-50 text-rose-700 transition';
       } else {
-        btn.className = 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+        btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
       }
       renderPlaceCards();
     }
 
     function getFilteredPlaces() {
       const q = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
-      return appState.places.filter(place => {
+      let list = appState.places.filter(place => {
         if (appState.filters.district !== 'ALL' && place.district !== appState.filters.district) return false;
         if (appState.filters.category !== 'ALL' && place.category !== appState.filters.category) return false;
         if (appState.filters.viral !== 'ALL' && !place.viralTags.includes(appState.filters.viral)) return false;
         if (appState.filters.selectedOnly && !isPlaceSelected(place.id)) return false;
+
+        const price = place.priceHKD || 0;
+        if (appState.filters.priceTier === 'FREE' && price > 0) return false;
+        if (appState.filters.priceTier === 'BUDGET' && (price === 0 || price > 80)) return false;
+        if (appState.filters.priceTier === 'MID' && (price <= 80 || price > 300)) return false;
+        if (appState.filters.priceTier === 'LUXURY' && price <= 300) return false;
 
         if (q) {
           const haystack = `${place.name} ${place.nameEn} ${place.district} ${place.category} ${place.signature} ${place.hashtags.join(' ')} ${place.tip}`.toLowerCase();
@@ -2236,6 +2827,19 @@
         }
         return true;
       });
+
+      const sortBy = appState.filters.sortBy || 'RECOMMENDED';
+      if (sortBy === 'RATING_DESC') {
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      } else if (sortBy === 'PRICE_ASC') {
+        list.sort((a, b) => (a.priceHKD || 0) - (b.priceHKD || 0));
+      } else if (sortBy === 'PRICE_DESC') {
+        list.sort((a, b) => (b.priceHKD || 0) - (a.priceHKD || 0));
+      } else if (sortBy === 'DAY_ASC') {
+        list.sort((a, b) => (a.recommendedDay || 1) - (b.recommendedDay || 1));
+      }
+
+      return list;
     }
 
     function isPlaceSelected(placeId) {
@@ -2298,9 +2902,10 @@
      */
     function applyPresetCourse(presetKey, silent = false) {
       const presets = {
-        classic: ['hk-8', 'hk-23', 'hk-14', 'hk-13', 'hk-1', 'hk-15', 'hk-2', 'hk-10', 'hk-12', 'hk-5', 'hk-6', 'hk-22'],
-        foodie: ['hk-1', 'hk-2', 'hk-3', 'hk-4', 'hk-5', 'hk-6', 'hk-7', 'hk-8', 'hk-9', 'hk-10', 'hk-11'],
-        disney: ['hk-19', 'hk-13', 'hk-1', 'hk-15', 'hk-18', 'hk-12', 'hk-17', 'hk-16', 'hk-24', 'hk-20', 'hk-21']
+        classic: ['hk-25', 'hk-8', 'hk-23', 'hk-14', 'hk-13', 'hk-1', 'hk-15', 'hk-2', 'hk-10', 'hk-12', 'hk-5', 'hk-6', 'hk-22'],
+        foodie: ['hk-25', 'hk-1', 'hk-31', 'hk-2', 'hk-3', 'hk-4', 'hk-5', 'hk-6', 'hk-7', 'hk-8', 'hk-9', 'hk-33', 'hk-34', 'hk-35'],
+        viral: ['hk-25', 'hk-31', 'hk-1', 'hk-13', 'hk-19', 'hk-15', 'hk-24', 'hk-16', 'hk-17', 'hk-37', 'hk-38', 'hk-39'],
+        disney: ['hk-25', 'hk-19', 'hk-13', 'hk-1', 'hk-15', 'hk-18', 'hk-12', 'hk-17', 'hk-16', 'hk-24', 'hk-20', 'hk-21']
       };
 
       const targetIds = presets[presetKey] || presets.classic;
@@ -2325,215 +2930,229 @@
 
       if (!silent) {
         const names = {
-          classic: '🔥 첫 홍콩 핵심 12선 코스',
-          foodie: '🥟 미슐랭·바이럴 미식 10선 코스',
-          disney: '🏰 디즈니랜드 + 인생샷 11선 코스'
+          classic: '🔥 첫 홍콩 핵심 13선 코스',
+          foodie: '🥟 미슐랭·노포 미식 14선 코스',
+          viral: '📸 인스타 바이럴 12선 코스',
+          disney: '🏰 디즈니랜드 + 인생샷 12선 코스'
         };
         showToast(`${names[presetKey]}가 내 일정에 자동으로 구성되었습니다!`);
       }
     }
 
-    /**
-     * Smart Geographic Route Clustering:
-     * Day 1: 침사추이/구룡 (Tsim Sha Tsui & West Kowloon Harbour Night View)
-     * Day 2: 센트럴/소호 (Central, SoHo, Mid-levels & Victoria Peak)
-     * Day 3: 몽콕/야우마테이 + 코즈웨이베이/동부 (Mong Kok, Choi Hung, Monster Building)
-     * Day 4: 란타우/디즈니 (Disneyland, Ngong Ping 360)
-     */
     function autoAssignSmartRoute(silent = false) {
       if (appState.selectedItems.length === 0) {
-        if (!silent) showToast('먼저 1단계에서 가고 싶은 장소를 1곳 이상 담아주세요!');
+        if (!silent) showToast('먼저 2단계에서 가고 싶은 장소를 담아주세요!');
         return;
       }
 
-      const maxDays = appState.tripDays || 4;
-      const defaultTimes = ['09:00', '10:45', '12:30', '14:30', '16:30', '18:30', '20:00', '21:15'];
+      const districtToDay = {
+        '침사추이/구룡': 1,
+        '센트럴/소호': 2,
+        '몽콕/야우마테이': 3,
+        '코즈웨이베이/동부': 3,
+        '란타우/디즈니': 4
+      };
 
       appState.selectedItems.forEach(item => {
         const place = appState.places.find(p => p.id === item.id);
         if (!place) return;
-
-        let targetDay = 1;
-        if (place.district === '침사추이/구룡') targetDay = 1;
-        else if (place.district === '센트럴/소호') targetDay = 2;
-        else if (place.district === '몽콕/야우마테이' || place.district === '코즈웨이베이/동부') targetDay = 3;
-        else if (place.district === '란타우/디즈니') targetDay = 4;
-
-        if (targetDay > maxDays) {
-          targetDay = ((targetDay - 1) % maxDays) + 1;
-        }
-        item.day = targetDay;
+        const targetDay = districtToDay[place.district] || place.recommendedDay || 1;
+        item.day = Math.min(appState.tripDays, targetDay);
+        if (!item.time) item.time = place.recommendedTime || '12:00';
       });
-
-      // Sort each day geographically (North-South or recommended time) and assign neat time slots
-      for (let d = 1; d <= maxDays; d++) {
-        const dayItems = appState.selectedItems.filter(i => i.day === d);
-        dayItems.sort((a, b) => {
-          const pa = appState.places.find(p => p.id === a.id);
-          const pb = appState.places.find(p => p.id === b.id);
-          const ta = pa?.recommendedTime || '12:00';
-          const tb = pb?.recommendedTime || '12:00';
-          return ta.localeCompare(tb);
-        });
-
-        dayItems.forEach((item, idx) => {
-          const place = appState.places.find(p => p.id === item.id);
-          item.time = place?.recommendedTime || defaultTimes[idx % defaultTimes.length];
-        });
-      }
 
       syncAllViews();
       saveToLocalStorage(false);
       if (!silent) {
-        showToast('✨ AI 동선 최적화 완료! 홍콩 지역별(침사추이/센트럴/몽콕/란타우)로 스마트하게 묶었습니다.');
+        showToast('🧠 AI가 홍콩 권역별로 이동 거리가 가장 짧은 최적의 일자(Day)에 자동 배정했습니다!');
       }
     }
 
     /**
-     * 8. RENDER PLACE CARDS (PAGE 1)
+     * 8. EXPLORER CARDS & EXTERNAL GOOGLE/APPLE SEARCH (PAGE 2)
      */
     function getCategoryBadgeStyle(category) {
-      if (category.includes('맛집')) return { bg: 'bg-rose-50 text-rose-700 border-rose-200', icon: 'fa-utensils', color: '#E11D48' };
-      if (category.includes('디저트')) return { bg: 'bg-amber-50 text-amber-800 border-amber-200', icon: 'fa-mug-hot', color: '#F59E0B' };
-      if (category.includes('랜드마크')) return { bg: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'fa-mountain-sun', color: '#2563EB' };
-      return { bg: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fa-camera-retro', color: '#9333EA' };
+      if (category.includes('숙소')) {
+        return { bg: 'bg-indigo-50 text-indigo-800 border-indigo-200', color: '#4F46E5' };
+      }
+      if (category.includes('미슐랭')) {
+        return { bg: 'bg-rose-50 text-rose-700 border-rose-200', color: '#E11D48' };
+      }
+      if (category.includes('디저트') || category.includes('카페')) {
+        return { bg: 'bg-amber-50 text-amber-800 border-amber-200', color: '#D97706' };
+      }
+      if (category.includes('랜드마크')) {
+        return { bg: 'bg-teal-50 text-teal-800 border-teal-200', color: '#0D9488' };
+      }
+      return { bg: 'bg-purple-50 text-purple-800 border-purple-200', color: '#7C3AED' };
     }
 
-    function getViralBadgeLabel(tag) {
-      const map = {
-        '인스타바이럴': { text: '📸 인스타·블로그 떡상', cls: 'bg-pink-100 text-pink-800' },
-        '구글평점TOP': { text: '🌟 구글 평점 우수', cls: 'bg-amber-100 text-amber-900' },
-        '미슐랭노포': { text: '🏅 미슐랭·현지 노포', cls: 'bg-rose-100 text-rose-800' },
-        '여행사필수': { text: '🎫 여행사 필수 코스', cls: 'bg-teal-100 text-teal-800' }
+    function executeGoogleMapSearch(provider = 'google') {
+      const input = document.getElementById('google-live-search-input');
+      const query = (input?.value || '').trim() || 'The Salisbury YMCA of Hong Kong';
+      const fullQuery = query.toLowerCase().includes('hong kong') || query.includes('홍콩')
+        ? query
+        : `${query} Hong Kong`;
+
+      if (provider === 'apple') {
+        window.open(`https://maps.apple.com/?q=${encodeURIComponent(fullQuery)}`, '_blank', 'noopener,noreferrer');
+      } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullQuery)}`, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    function quickAddSearchedPlace() {
+      const input = document.getElementById('google-live-search-input');
+      const name = (input?.value || '').trim();
+      if (!name) {
+        showToast('추가할 장소나 호텔 이름을 검색창에 먼저 입력해주세요!');
+        return;
+      }
+
+      const existing = appState.places.find(
+        p => p.name.toLowerCase().includes(name.toLowerCase()) || p.nameEn.toLowerCase().includes(name.toLowerCase())
+      );
+
+      if (existing) {
+        if (!isPlaceSelected(existing.id)) {
+          togglePlaceSelection(existing.id);
+        } else {
+          showToast(`'${existing.name}'은(는) 이미 내 일정에 담겨 있습니다!`);
+        }
+        return;
+      }
+
+      const newId = 'custom-' + Date.now();
+      const newPlace = {
+        id: newId,
+        name: name,
+        nameEn: name,
+        district: '침사추이/구룡',
+        category: '포토스팟 & 쇼핑',
+        rating: 4.7,
+        reviews: '구글맵 픽',
+        viralTags: ['구글평점TOP', '인스타바이럴'],
+        hashtags: ['#구글맵검색추가', '#나만의픽'],
+        signature: `${name} 자유 방문 및 주변 탐색`,
+        priceHKD: 100,
+        hours: '구글 지도 영업시간 참조',
+        tip: '구글 지도 및 애플 지도 버튼으로 실시간 위치와 영업시간을 바로 확인할 수 있습니다.',
+        lat: 22.2955 + (Math.random() - 0.5) * 0.005,
+        lng: 114.1710 + (Math.random() - 0.5) * 0.005,
+        recommendedDay: 1,
+        recommendedTime: '14:00'
       };
-      return map[tag] || { text: tag, cls: 'bg-slate-100 text-slate-700' };
+
+      appState.places.unshift(newPlace);
+      appState.selectedItems.push({
+        id: newId,
+        day: 1,
+        time: '14:00',
+        budgetHKD: 100,
+        memo: `${name} 방문`
+      });
+
+      if (input) input.value = '';
+      syncAllViews();
+      saveToLocalStorage(false);
+      showToast(`✨ '${name}' 장소가 큐레이션 및 Day 1 일정에 추가되었습니다!`);
     }
 
     function renderPlaceCards() {
       const grid = document.getElementById('places-grid');
+      if (!grid) return;
+
       const filtered = getFilteredPlaces();
-      document.getElementById('spot-result-count').textContent = filtered.length;
+      const countEl = document.getElementById('spot-result-count');
+      if (countEl) countEl.textContent = filtered.length;
 
       if (filtered.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full bg-white rounded-3xl border border-slate-200 p-12 text-center">
-            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+          <div class="col-span-full bg-white rounded-3xl border border-slate-200 p-10 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto text-xl">
               <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <h3 class="text-base font-extrabold text-slate-800">조건에 맞는 홍콩 스팟이 없습니다</h3>
-            <p class="text-xs text-slate-500 mt-1">필터를 '전체'로 변경하거나 검색어를 지워보세요.</p>
-            <button onclick="setFilter('district','ALL'); setFilter('category','ALL'); setFilter('viral','ALL');" class="mt-4 px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">
-              모든 필터 초기화
+            <h4 class="text-base font-black text-slate-900">조건에 맞는 홍콩 스팟이 없습니다</h4>
+            <p class="text-xs text-slate-500">필터 초기화 버튼을 누르거나 상단 외부 지도 검색창에서 직접 추가해 보세요.</p>
+            <button onclick="resetExplorerFilters()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow-sm">
+              필터 초기화하기
             </button>
           </div>
         `;
         return;
       }
 
+      const rate = appState.exchangeRate || 180;
+
       grid.innerHTML = filtered.map(place => {
         const selected = isPlaceSelected(place.id);
+        const selInfo = appState.selectedItems.find(i => i.id === place.id);
         const catStyle = getCategoryBadgeStyle(place.category);
-        const krwPrice = Math.round((place.priceHKD || 0) * appState.exchangeRate).toLocaleString();
+        const krwPrice = Math.round((place.priceHKD || 0) * rate).toLocaleString();
         const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameEn + ' Hong Kong')}`;
+        const appleUrl = `https://maps.apple.com/?q=${encodeURIComponent(place.nameEn + ' Hong Kong')}&ll=${place.lat},${place.lng}`;
 
         return `
-          <article class="bg-white rounded-2xl border ${selected ? 'border-2 border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200'} shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+          <article class="bg-white rounded-2xl border ${selected ? 'border-2 border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 hover:border-slate-300'} shadow-sm p-4 flex flex-col justify-between transition">
             <div>
-              <!-- Card Top Header -->
-              <div class="p-4 sm:p-5 pb-3">
-                <div class="flex items-center justify-between gap-2 mb-2.5">
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border ${catStyle.bg}">
-                      <i class="fa-solid ${catStyle.icon} mr-1"></i>${place.category}
-                    </span>
-                    <span class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-700">
-                      📍 ${place.district}
-                    </span>
-                  </div>
-
-                  <!-- Google Rating Badge -->
-                  <div class="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg shrink-0">
-                    <i class="fa-solid fa-star text-amber-500 text-xs"></i>
-                    <span class="text-xs font-black text-slate-900">${place.rating}</span>
-                    <span class="text-[10px] text-slate-500">(${place.reviews})</span>
-                  </div>
+              <!-- Top Badges Row -->
+              <div class="flex items-center justify-between gap-1.5 mb-2">
+                <div class="flex flex-wrap items-center gap-1">
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${catStyle.bg}">${place.category}</span>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">📍 ${place.district}</span>
                 </div>
-
-                <!-- Place Title -->
-                <h3 class="text-base sm:text-lg font-black text-slate-900 leading-snug">
-                  ${place.name}
-                </h3>
-                <p class="text-xs font-medium text-slate-400">${place.nameEn}</p>
-
-                <!-- Viral Source Badges -->
-                <div class="flex flex-wrap gap-1 mt-2.5">
-                  ${place.viralTags.map(vt => {
-                    const b = getViralBadgeLabel(vt);
-                    return `<span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${b.cls}">${b.text}</span>`;
-                  }).join('')}
-                </div>
-
-                <!-- Hashtags -->
-                <div class="flex flex-wrap gap-1.5 mt-2">
-                  ${place.hashtags.map(tag => `<span class="text-[11px] font-bold text-rose-600">${tag}</span>`).join('')}
+                <div class="flex items-center gap-1 text-xs font-black text-amber-500 shrink-0">
+                  <i class="fa-solid fa-star"></i>
+                  <span class="text-slate-900">${place.rating}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">(${place.reviews})</span>
                 </div>
               </div>
 
-              <!-- Signature Menu & Info Box -->
-              <div class="px-4 sm:px-5 py-3 bg-slate-50/80 border-y border-slate-100 space-y-1.5 text-xs">
-                <div class="flex items-start gap-2">
-                  <span class="font-extrabold text-slate-700 shrink-0">✨ 핵심 포인트:</span>
-                  <span class="font-bold text-slate-900">${place.signature}</span>
-                </div>
-                <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1">
-                  <span><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${place.hours}</span>
-                  <span class="font-bold text-teal-700">
-                    ${place.priceHKD > 0 ? `약 HK$ ${place.priceHKD} (${krwPrice}원)` : '무료 관람'}
-                  </span>
+              <!-- Title & Hashtags -->
+              <h3 class="text-base font-black text-slate-900 leading-snug">${place.name}</h3>
+              <div class="flex flex-wrap gap-1 mt-1.5">
+                ${place.hashtags.map(tag => `<span class="text-[10px] font-bold text-rose-600 bg-rose-50/80 px-2 py-0.5 rounded-md">${tag}</span>`).join('')}
+              </div>
+
+              <!-- Signature & Price -->
+              <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
+                <div class="text-slate-800"><strong class="font-extrabold text-teal-700">핵심:</strong> ${place.signature}</div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+                  <span><i class="fa-regular fa-clock mr-1"></i>${place.hours}</span>
+                  <span class="font-extrabold text-slate-900">${place.priceHKD > 0 ? `HK$ ${place.priceHKD} (약 ${krwPrice}원)` : '무료 입장'}</span>
                 </div>
               </div>
 
-              <!-- Honey Tip -->
-              <div class="p-4 sm:p-5 pt-3">
-                <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-2.5 text-xs text-slate-700 leading-relaxed">
-                  <span class="font-extrabold text-amber-800"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>실전 꿀팁:</span>
-                  ${place.tip}
-                </div>
-              </div>
+              <!-- Insider Tip -->
+              <p class="mt-2.5 text-[11px] text-slate-600 leading-relaxed">
+                <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>${place.tip}
+              </p>
             </div>
 
-            <!-- Card Footer Actions -->
-            <div class="px-4 sm:px-5 pb-4 pt-1 flex items-center gap-2">
-              <a
-                href="${gmapUrl}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shrink-0"
-                title="구글 지도에서 위치 및 최신 리뷰 보기"
-              >
-                <i class="fa-solid fa-map-location-dot text-blue-600"></i>
-                <span>구글맵</span>
-              </a>
-
-              <button
-                onclick="jumpToSpotOnMap('${place.id}')"
-                class="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shrink-0"
-                title="앱 내 인터랙티브 지도에서 보기"
-              >
-                <i class="fa-solid fa-location-crosshairs text-teal-600"></i>
-                <span>지도</span>
-              </button>
+            <!-- Bottom Actions: Google Map / Apple Map / App Map / Select -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
+              <div class="flex items-center gap-1">
+                <a href="${gmapUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-extrabold transition" title="구글 지도로 열기">
+                  <i class="fa-brands fa-google mr-0.5"></i>구글맵
+                </a>
+                <a href="${appleUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold transition" title="애플 지도로 열기">
+                  <i class="fa-brands fa-apple"></i>
+                </a>
+                <button onclick="jumpToSpotOnMap('${place.id}')" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition" title="앱 내 동선 지도에서 위치 확인">
+                  <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
+              </div>
 
               <button
                 onclick="togglePlaceSelection('${place.id}')"
-                class="flex-grow flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-extrabold transition shadow-sm ${
+                class="flex-grow max-w-[150px] py-2 px-3 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 ${
                   selected
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm'
                     : 'bg-slate-900 hover:bg-slate-800 text-white'
                 }"
               >
                 <i class="fa-solid ${selected ? 'fa-check' : 'fa-plus'}"></i>
-                <span>${selected ? '일정에 담김 (해제)' : '내 일정에 담기'}</span>
+                <span>${selected ? `담김 (Day ${selInfo?.day || 1})` : '일정에 담기'}</span>
               </button>
             </div>
           </article>
@@ -2542,11 +3161,201 @@
     }
 
     /**
-     * 9. INTERACTIVE LEAFLET MAP & ROUTE VISUALIZATION (PAGE 2)
+     * 9. INTERACTIVE LEAFLET MAP & GOOGLE MAPS MULTI-STOP SYNC (PAGE 3)
      */
+    function switchMapEngine(engine) {
+      appState.mapEngine = engine;
+      const leafletDiv = document.getElementById('hk-leaflet-map');
+      const gmapDiv = document.getElementById('hk-google-embed-container');
+      const btnLeaflet = document.getElementById('btn-engine-leaflet');
+      const btnGmap = document.getElementById('btn-engine-gmap');
+      const label = document.getElementById('active-map-engine-label');
+
+      if (engine === 'gmap_embed') {
+        leafletDiv.classList.add('hidden');
+        gmapDiv.classList.remove('hidden');
+        btnLeaflet.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-extrabold text-[11px] transition';
+        btnGmap.className = 'px-2.5 py-1 rounded-lg bg-blue-600 text-white font-extrabold text-[11px] transition';
+        label.textContent = '구글 지도 임베드 뷰 (사이드바 장소 클릭 시 즉시 이동 · No API Key)';
+      } else {
+        gmapDiv.classList.add('hidden');
+        leafletDiv.classList.remove('hidden');
+        btnLeaflet.className = 'px-2.5 py-1 rounded-lg bg-rose-600 text-white font-extrabold text-[11px] transition';
+        btnGmap.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-300 font-extrabold text-[11px] transition';
+        label.textContent = '인터랙티브 동선 핀 지도 (No API Key · 실시간 작동)';
+        if (mapInstance) {
+          setTimeout(() => mapInstance.invalidateSize(), 80);
+        }
+      }
+    }
+
+    function updateGoogleEmbedPreview(queryText) {
+      const iframe = document.getElementById('hk-google-embed-iframe');
+      if (!iframe) return;
+      const cleanQ = encodeURIComponent(queryText + ' Hong Kong');
+      iframe.src = `https://maps.google.com/maps?q=${cleanQ}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+    }
+
+    /**
+     * Sync Day or Entire Itinerary to Google Maps Multi-Stop Directions URL
+     * and KML Export for Google My Maps
+     */
+    function syncDayToGoogleMaps(dayOrAll = 'ALL') {
+      let targetItems = [];
+      if (dayOrAll === 'ALL') {
+        targetItems = [...appState.selectedItems].sort((a, b) => {
+          if (a.day !== b.day) return a.day - b.day;
+          return (a.time || '').localeCompare(b.time || '');
+        });
+      } else {
+        const dNum = parseInt(dayOrAll, 10);
+        targetItems = appState.selectedItems
+          .filter(i => i.day === dNum)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      }
+
+      const validPlaces = targetItems
+        .map(item => appState.places.find(p => p.id === item.id))
+        .filter(Boolean);
+
+      if (validPlaces.length === 0) {
+        showToast('구글 지도에 동기화할 장소가 없습니다. 먼저 장소를 담아주세요!');
+        return;
+      }
+
+      if (validPlaces.length === 1) {
+        const p = validPlaces[0];
+        const singleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.nameEn + ' Hong Kong')}`;
+        window.open(singleUrl, '_blank', 'noopener,noreferrer');
+        showToast(`🗺️ 구글 지도로 '${p.name}' 위치를 열었습니다!`);
+        return;
+      }
+
+      // Google Maps Multi-Stop Directions URL supports up to ~10 stops cleanly per URL
+      const stops = validPlaces.slice(0, 10);
+      const origin = encodeURIComponent(`${stops[0].nameEn}, Hong Kong`);
+      const destination = encodeURIComponent(`${stops[stops.length - 1].nameEn}, Hong Kong`);
+      const waypoints = stops
+        .slice(1, -1)
+        .map(p => encodeURIComponent(`${p.nameEn}, Hong Kong`))
+        .join('|');
+
+      let gmapDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`;
+      if (waypoints) {
+        gmapDirUrl += `&waypoints=${waypoints}`;
+      }
+
+      window.open(gmapDirUrl, '_blank', 'noopener,noreferrer');
+      const label = dayOrAll === 'ALL' ? `전체 주요 일정(${stops.length}곳)` : `Day ${dayOrAll} 코스(${stops.length}곳)`;
+      showToast(`🚀 구글 지도 다중 경유지 길찾기에 ${label}이 동기화되었습니다!`);
+    }
+
+    function exportGoogleMyMapsKML() {
+      if (appState.selectedItems.length === 0) {
+        showToast('내보낼 일정이 없습니다. 먼저 장소를 담아주세요!');
+        return;
+      }
+
+      const escapeXml = (str) => String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+
+      let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n  <Document>\n`;
+      kml += `    <name>${escapeXml(appState.travelerName)}님의 홍콩 ${escapeXml(appState.tripDurationLabel)} 여행 지도</name>\n`;
+      kml += `    <description>홍콩 올인원 여행 플래너에서 생성된 구글 내 지도(Google My Maps) 동기화 파일입니다.</description>\n`;
+
+      for (let d = 1; d <= appState.tripDays; d++) {
+        const dayItems = appState.selectedItems
+          .filter(i => i.day === d)
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        if (dayItems.length === 0) continue;
+
+        kml += `    <Folder>\n      <name>Day ${d} 코스</name>\n`;
+        const coordsLine = [];
+
+        dayItems.forEach((item, idx) => {
+          const place = appState.places.find(p => p.id === item.id);
+          if (!place) return;
+          coordsLine.push(`${place.lng},${place.lat},0`);
+          kml += `      <Placemark>\n`;
+          kml += `        <name>[Day ${d} - ${idx + 1}] ${escapeXml(place.name)} (${escapeXml(item.time)})</name>\n`;
+          kml += `        <description>${escapeXml(`구분: ${place.category} | 지역: ${place.district} | 핵심메뉴/메모: ${item.memo || place.signature} | 예상경비: HK$${item.budgetHKD} | 꿀팁: ${place.tip}`)}</description>\n`;
+          kml += `        <Point><coordinates>${place.lng},${place.lat},0</coordinates></Point>\n`;
+          kml += `      </Placemark>\n`;
+        });
+
+        if (coordsLine.length >= 2) {
+          kml += `      <Placemark>\n`;
+          kml += `        <name>Day ${d} 이동 동선 연결선</name>\n`;
+          kml += `        <LineString><tessellate>1</tessellate><coordinates>${coordsLine.join(' ')}</coordinates></LineString>\n`;
+          kml += `      </Placemark>\n`;
+        }
+        kml += `    </Folder>\n`;
+      }
+
+      kml += `  </Document>\n</kml>`;
+
+      const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `HongKong_Itinerary_${appState.flight.startDate}.kml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('📥 구글 내 지도(Google My Maps) 및 구글 어스용 .KML 파일이 다운로드되었습니다!');
+    }
+
+    function renderGoogleSyncBar() {
+      const container = document.getElementById('google-sync-day-buttons');
+      if (!container) return;
+
+      const dayBtns = Array.from({ length: appState.tripDays }, (_, i) => {
+        const d = i + 1;
+        return `
+          <button onclick="syncDayToGoogleMaps(${d})" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm">
+            <i class="fa-solid fa-route mr-1"></i>Day ${d} 구글지도 경로열기
+          </button>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        ${dayBtns}
+        <button onclick="syncDayToGoogleMaps('ALL')" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition shadow-sm">
+          <i class="fa-brands fa-google mr-1"></i>전체 일정 통합 경로
+        </button>
+        <button onclick="exportGoogleMyMapsKML()" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold border border-white/20 transition" title="Google 내 지도(My Maps)에서 불러올 수 있는 파일">
+          <i class="fa-solid fa-file-arrow-down text-teal-300 mr-1"></i>.KML 파일 저장
+        </button>
+      `;
+    }
+
+    function filterMapSidebarByKeyword(keyword) {
+      renderMapMarkers(keyword.trim().toLowerCase());
+    }
+
+    function openExternalMapFromMapPage(provider = 'google') {
+      const q = (document.getElementById('map-page-search-input')?.value || '').trim() || 'The Salisbury YMCA of Hong Kong';
+      const fullQuery = q.toLowerCase().includes('hong kong') || q.includes('홍콩') ? q : `${q} Hong Kong`;
+      if (provider === 'apple') {
+        window.open(`https://maps.apple.com/?q=${encodeURIComponent(fullQuery)}`, '_blank', 'noopener,noreferrer');
+      } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullQuery)}`, '_blank', 'noopener,noreferrer');
+      }
+    }
+
     function initLeafletMap() {
       const container = document.getElementById('hk-leaflet-map');
       if (!container || mapInstance) return;
+      if (typeof L === 'undefined') {
+        switchMapEngine('gmap_embed');
+        return;
+      }
 
       // Center on Victoria Harbour between Tsim Sha Tsui and Central
       mapInstance = L.map('hk-leaflet-map', {
@@ -2555,17 +3364,24 @@
         zoomControl: true
       });
 
-      // Clean Voyager CartoDB basemap for crisp urban readability
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
+      // Use official OpenStreetMap standard tiles (100% Free, Never requires API Key)
+      const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
-      }).addTo(mapInstance);
+      });
+
+      osmLayer.on('tileerror', function () {
+        // Automatic fallback if any tile fails
+        console.debug('Tile fallback active');
+      });
+
+      osmLayer.addTo(mapInstance);
 
       mapMarkersLayer = L.layerGroup().addTo(mapInstance);
       mapPolylineLayer = L.layerGroup().addTo(mapInstance);
 
       renderDynamicMapButtons();
+      renderGoogleSyncBar();
       renderMapMarkers();
     }
 
@@ -2601,6 +3417,19 @@
       renderMapMarkers();
     }
 
+    function calculateDistanceKm(lat1, lng1, lat2, lng2) {
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const R = 6371; // Earth radius in km
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
     function getRecommendedTransitBetweenPlaces(p1, p2, distKm) {
       if (distKm < 0.85) {
         return `도보 약 ${Math.max(4, Math.round(distKm * 14))}분`;
@@ -2620,18 +3449,7 @@
       return `🚇 MTR/버스 약 ${Math.max(8, Math.round(distKm * 4.5))}분`;
     }
 
-    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function renderMapMarkers() {
+    function renderMapMarkers(searchQuery = '') {
       if (!mapInstance || !mapMarkersLayer || !mapPolylineLayer) return;
 
       mapMarkersLayer.clearLayers();
@@ -2668,6 +3486,13 @@
           .filter(x => x.place);
       }
 
+      if (searchQuery) {
+        itemsToDisplay = itemsToDisplay.filter(({ place }) => {
+          const hay = `${place.name} ${place.nameEn} ${place.district} ${place.category} ${place.signature}`.toLowerCase();
+          return hay.includes(searchQuery);
+        });
+      }
+
       const latLngs = [];
       let totalRouteKm = 0;
 
@@ -2677,7 +3502,7 @@
         const isSelected = Boolean(selectedInfo);
 
         const pinSize = isDayMode ? 32 : 28;
-        const badgeLabel = isDayMode ? order : (isSelected ? '★' : '•');
+        const badgeLabel = isDayMode ? order : (place.category.includes('숙소') ? '🏨' : (isSelected ? '★' : '•'));
 
         const iconHtml = `
           <div class="custom-pin" style="width:${pinSize}px; height:${pinSize}px; background-color:${catStyle.color}; font-size:${isDayMode ? '13px' : '12px'};">
@@ -2694,6 +3519,7 @@
         });
 
         const gmapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.nameEn + ' Hong Kong')}`;
+        const appleMapUrl = `https://maps.apple.com/?q=${encodeURIComponent(place.nameEn + ' Hong Kong')}&ll=${place.lat},${place.lng}`;
 
         const popupHtml = `
           <div class="w-64 space-y-2">
@@ -2703,14 +3529,17 @@
             </div>
             <div class="font-black text-sm text-slate-900">${place.name}</div>
             <div class="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
-              <strong class="text-slate-800">추천:</strong> ${place.signature}
+              <strong class="text-slate-800">핵심:</strong> ${place.signature}
             </div>
-            <div class="flex items-center gap-1.5 pt-1">
-              <a href="${gmapUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 text-center py-1.5 px-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs">
-                구글맵 열기
+            <div class="grid grid-cols-3 gap-1 pt-1">
+              <a href="${gmapUrl}" target="_blank" rel="noopener noreferrer" class="text-center py-1.5 px-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]">
+                구글맵
               </a>
-              <button onclick="togglePlaceSelection('${place.id}')" class="flex-1 text-center py-1.5 px-2 rounded-lg ${isSelected ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'} font-bold text-xs">
-                ${isSelected ? '담김 (해제)' : '일정에 담기'}
+              <a href="${appleMapUrl}" target="_blank" rel="noopener noreferrer" class="text-center py-1.5 px-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px]">
+                <i class="fa-brands fa-apple"></i> 애플맵
+              </a>
+              <button onclick="togglePlaceSelection('${place.id}')" class="text-center py-1.5 px-1.5 rounded-lg ${isSelected ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'} font-bold text-[11px]">
+                ${isSelected ? '담김' : '담기'}
               </button>
             </div>
           </div>
@@ -2819,7 +3648,10 @@
       }).join('');
     }
 
-    function flyToRegion(lat, lng, zoom = 15) {
+    function flyToRegion(lat, lng, zoom = 15, placeName = '') {
+      if (placeName) {
+        updateGoogleEmbedPreview(placeName);
+      }
       if (!mapInstance) return;
       mapInstance.flyTo([lat, lng], zoom, { duration: 0.8 });
     }
@@ -2828,8 +3660,9 @@
       const place = appState.places.find(p => p.id === placeId);
       if (!place) return;
       switchPage(3);
+      updateGoogleEmbedPreview(place.nameEn);
       setTimeout(() => {
-        flyToRegion(place.lat, place.lng, 16);
+        flyToRegion(place.lat, place.lng, 16, place.nameEn);
       }, 250);
     }
 
@@ -2980,12 +3813,15 @@
                 <span class="px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-xs sm:text-sm">DAY ${dayNum}</span>
                 <h3 class="text-sm sm:text-base font-extrabold">${getDayThemeTitle(dayNum)}</h3>
               </div>
-              <div class="flex items-center gap-3 text-xs">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-300">일정 <strong>${dayItems.length}</strong>곳</span>
                 <span class="text-slate-600">|</span>
                 <span class="font-bold text-amber-400">소계: HK$ ${dayHKD} (약 ${dayKRW}원)</span>
+                <button onclick="syncDayToGoogleMaps(${dayNum})" class="bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg font-extrabold text-white transition">
+                  <i class="fa-brands fa-google mr-1"></i>Day ${dayNum} 구글지도 동기화
+                </button>
                 <button onclick="switchPage(3); setMapMode('DAY${dayNum}');" class="bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg font-bold text-teal-300 transition">
-                  <i class="fa-solid fa-map mr-1"></i>Day ${dayNum} 지도 동선
+                  <i class="fa-solid fa-map mr-1"></i>앱 지도
                 </button>
               </div>
             </div>
@@ -3377,6 +4213,7 @@
       syncCountersAndTotals();
       renderPlaceCards();
       renderDynamicMapButtons();
+      renderGoogleSyncBar();
       if (mapInstance) renderMapMarkers();
       renderItineraryBuilder();
       renderFinalTravelBook();
